@@ -109,25 +109,15 @@ control MyIngress(inout headers hdr,
         mark_to_drop(standard_metadata);
     }
 
-    // ipv4_forward 分为 正常转发成功，和检测到目的端口故障
-    // action out_port_status(egressSpec_t port){
-    //     meta.start_port=port;
-    //     all_ports_status.read(meta.status_port,meta.start_port);
-    // }
-    
-    action ipv4_forward(macAddr_t dstAddr){
-        standard_metadata.egress_spec = meta.start_port;
-        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-        hdr.ethernet.dstAddr = dstAddr;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-    }
-    action try_ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
+    action try_ipv4_forward(egressSpec_t port) {
         standard_metadata.egress_spec = port;
-        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-        hdr.ethernet.dstAddr = dstAddr;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+        //更新逻辑应该放到update_mac_addr里统一做
+        // hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+        // hdr.ethernet.dstAddr = dstAddr;
+        // hdr.ipv4.ttl = hdr.ipv4.ttl - 1; //不应该在这更新ttl
         all_ports_status.read(meta.out_port_status, (bit<32>)standard_metadata.egress_spec);
     }
+
     table ipv4_lpm {
         key = {
             hdr.ipv4.dstAddr: lpm;
@@ -137,19 +127,10 @@ control MyIngress(inout headers hdr,
             drop;
             NoAction;
         }
-    }
-    table ipv4_match {
-        key = {
-            hdr.ipv4.dstAddr: lpm;
-        }
-        actions = {
-            out_port_status;
-            drop;
-            NoAction;
-        }
         size = 1024;
         default_action = drop();
     }
+
     action copy_path(backup_length_t length,bp_v1_hop_t v1,bp_v2_hop_t v2,bp_v3_hop_t v3,bp_v4_hop_t v4,bp_v5_hop_t v5,bp_v6_hop_t v6,bp_v7_hop_t v7,bp_v8_hop_t v8){
             meta.port_backup_length=length;
             meta.meta_bp_v1_hop=v1;
@@ -161,27 +142,29 @@ control MyIngress(inout headers hdr,
             meta.meta_bp_v7_hop=v7;
             meta.meta_bp_v8_hop=v8;
     }
-    table port_backup_path{
+    table port_backup_path {
         key = {
             standard_metadata.egress_spec: exact;
         }
-        actions ={
+        actions = {
             copy_path;
         }
     }
 
-    table recoveryPath_exact {
-        key = {
-            meta.start_port: exact;
-        }
-        actions = {
-            recoveryPath_forward;
-            drop;
-        }
-        size = 1024;
-        default_action = drop();
+    action update_mac_addr(macAddr_t dstAddr) {
+        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+        hdr.ethernet.dstAddr = dstAddr;
     }
-     action recoveryPath_finish() {
+    table port_to_mac [
+        key = {
+            standard_metadata.egress_spec: exact;
+        }
+        action = {
+            update_mac_addr;
+        }
+    ]
+
+    action recoveryPath_finish() {
         hdr.ethernet.etherType = TYPE_IPV4;
     }
     action update_ttl(){
@@ -269,7 +252,7 @@ control MyIngress(inout headers hdr,
         hdr.srecoveryPath[6].port == meta.meta_bp_v7_hop;
     }
     action update_8_length(){
-        hdr.recoveryPath.pushfront(7);
+        hdr.recoveryPath.pushfront(8);
         hdr.srecoveryPath[0].bos == 0;
         hdr.srecoveryPath[0].port == meta.meta_bp_v1_hop;
         hdr.srecoveryPath[1].bos == 0;
@@ -320,7 +303,6 @@ control MyIngress(inout headers hdr,
                     update_8_length();
                 }
             }
-        
         }
 
 
@@ -332,9 +314,11 @@ control MyIngress(inout headers hdr,
             recoveryPath_nhop();
         }
         //if we are doing failover, do we need to decrease ttl?
-        // if(hdr.ipv4.isValid()){
-        //     update_ttl;
-        // }
+        if(hdr.ipv4.isValid()){
+            update_ttl;
+        }
+        
+        port_to_mac.apply();//update mac
     }
 }
 /*************************************************************************
