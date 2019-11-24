@@ -157,14 +157,14 @@ control MyIngress(inout headers hdr,
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
     }
-    table port_to_mac [
+    table port_to_mac {
         key = {
             standard_metadata.egress_spec: exact;
         }
         actions = {
             update_mac_addr;
         }
-    ]
+    }
 
     action recoveryPath_finish() {
         hdr.ethernet.etherType = TYPE_IPV4;
@@ -178,99 +178,99 @@ control MyIngress(inout headers hdr,
     }
     action update_1_length(){
         hdr.recoveryPath.pushfront(1);
-        hdr.srecoveryPath[0].bos == 1;
-        hdr.srecoveryPath[0].port == meta.meta_bp_v1_hop;
+        hdr.srecoveryPath[0].bos = 1;
+        hdr.srecoveryPath[0].port = meta.meta_bp_v1_hop;
     }
     action update_2_length(){
         hdr.recoveryPath.pushfront(2);
-        hdr.srecoveryPath[0].bos == 0;
-        hdr.srecoveryPath[0].port == meta.meta_bp_v1_hop;
-        hdr.srecoveryPath[1].bos == 1;
-        hdr.srecoveryPath[1].port == meta.meta_bp_v2_hop;
+        hdr.srecoveryPath[0].bos = 0;
+        hdr.srecoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.srecoveryPath[1].bos = 1;
+        hdr.srecoveryPath[1].port = meta.meta_bp_v2_hop;
     }
     action update_3_length(){
         hdr.recoveryPath.pushfront(3);
-        hdr.srecoveryPath[0].bos == 0;
-        hdr.srecoveryPath[0].port == meta.meta_bp_v1_hop;
-        hdr.srecoveryPath[1].bos == 0;
-        hdr.srecoveryPath[1].port == meta.meta_bp_v2_hop;
-        hdr.srecoveryPath[2].bos == 0;
-        hdr.srecoveryPath[2].port == meta.meta_bp_v3_hop;
+        hdr.srecoveryPath[0].bos = 0;
+        hdr.srecoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.srecoveryPath[1].bos = 0;
+        hdr.srecoveryPath[1].port = meta.meta_bp_v2_hop;
+        hdr.srecoveryPath[2].bos = 0;
+        hdr.srecoveryPath[2].port = meta.meta_bp_v3_hop;
     }
     action update_4_length(){
         hdr.recoveryPath.pushfront(4);
-        hdr.srecoveryPath[0].bos == 0;
-        hdr.srecoveryPath[0].port == meta.meta_bp_v1_hop;
-        hdr.srecoveryPath[1].bos == 0;
-        hdr.srecoveryPath[1].port == meta.meta_bp_v2_hop;
-        hdr.srecoveryPath[2].bos == 0;
-        hdr.srecoveryPath[2].port == meta.meta_bp_v3_hop;
-        hdr.srecoveryPath[3].bos == 1;
-        hdr.srecoveryPath[3].port == meta.meta_bp_v4_hop;
+        hdr.srecoveryPath[0].bos = 0;
+        hdr.srecoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.srecoveryPath[1].bos = 0;
+        hdr.srecoveryPath[1].port = meta.meta_bp_v2_hop;
+        hdr.srecoveryPath[2].bos = 0;
+        hdr.srecoveryPath[2].port = meta.meta_bp_v3_hop;
+        hdr.srecoveryPath[3].bos = 1;
+        hdr.srecoveryPath[3].port = meta.meta_bp_v4_hop;
     }
     action update_5_length(){
         hdr.recoveryPath.pushfront(5);
-        hdr.srecoveryPath[0].bos == 0;
-        hdr.srecoveryPath[0].port == meta.meta_bp_v1_hop;
-        hdr.srecoveryPath[1].bos == 0;
-        hdr.srecoveryPath[1].port == meta.meta_bp_v2_hop;
-        hdr.srecoveryPath[2].bos == 0;
-        hdr.srecoveryPath[2].port == meta.meta_bp_v3_hop;
-        hdr.srecoveryPath[3].bos == 0;
-        hdr.srecoveryPath[3].port == meta.meta_bp_v4_hop;
-        hdr.srecoveryPath[4].bos == 1;
-        hdr.srecoveryPath[4].port == meta.meta_bp_v5_hop;
+        hdr.srecoveryPath[0].bos = 0;
+        hdr.srecoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.srecoveryPath[1].bos = 0;
+        hdr.srecoveryPath[1].port = meta.meta_bp_v2_hop;
+        hdr.srecoveryPath[2].bos = 0;
+        hdr.srecoveryPath[2].port = meta.meta_bp_v3_hop;
+        hdr.srecoveryPath[3].bos = 0;
+        hdr.srecoveryPath[3].port = meta.meta_bp_v4_hop;
+        hdr.srecoveryPath[4].bos = 1;
+        hdr.srecoveryPath[4].port = meta.meta_bp_v5_hop;
     }
     action update_6_length(){
         hdr.recoveryPath.pushfront(6);
-        hdr.srecoveryPath[0].bos == 0;
-        hdr.srecoveryPath[0].port == meta.meta_bp_v1_hop;
-        hdr.srecoveryPath[1].bos == 0;
-        hdr.srecoveryPath[1].port == meta.meta_bp_v2_hop;
-        hdr.srecoveryPath[2].bos == 0;
-        hdr.srecoveryPath[2].port == meta.meta_bp_v3_hop;
-        hdr.srecoveryPath[3].bos == 0;
-        hdr.srecoveryPath[3].port == meta.meta_bp_v4_hop;
-        hdr.srecoveryPath[4].bos == 0;
-        hdr.srecoveryPath[4].port == meta.meta_bp_v5_hop;
-        hdr.srecoveryPath[5].bos == 1;
-        hdr.srecoveryPath[5].port == meta.meta_bp_v6_hop;
+        hdr.srecoveryPath[0].bos = 0;
+        hdr.srecoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.srecoveryPath[1].bos = 0;
+        hdr.srecoveryPath[1].port = meta.meta_bp_v2_hop;
+        hdr.srecoveryPath[2].bos = 0;
+        hdr.srecoveryPath[2].port = meta.meta_bp_v3_hop;
+        hdr.srecoveryPath[3].bos = 0;
+        hdr.srecoveryPath[3].port = meta.meta_bp_v4_hop;
+        hdr.srecoveryPath[4].bos = 0;
+        hdr.srecoveryPath[4].port = meta.meta_bp_v5_hop;
+        hdr.srecoveryPath[5].bos = 1;
+        hdr.srecoveryPath[5].port = meta.meta_bp_v6_hop;
     }
     action update_7_length(){
         hdr.recoveryPath.pushfront(7);
-        hdr.srecoveryPath[0].bos == 0;
-        hdr.srecoveryPath[0].port == meta.meta_bp_v1_hop;
-        hdr.srecoveryPath[1].bos == 0;
-        hdr.srecoveryPath[1].port == meta.meta_bp_v2_hop;
-        hdr.srecoveryPath[2].bos == 0;
-        hdr.srecoveryPath[2].port == meta.meta_bp_v3_hop;
-        hdr.srecoveryPath[3].bos == 0;
-        hdr.srecoveryPath[3].port == meta.meta_bp_v4_hop;
-        hdr.srecoveryPath[4].bos == 0;
-        hdr.srecoveryPath[4].port == meta.meta_bp_v5_hop;
-        hdr.srecoveryPath[5].bos == 0;
-        hdr.srecoveryPath[5].port == meta.meta_bp_v6_hop;
-        hdr.srecoveryPath[6].bos == 1;
-        hdr.srecoveryPath[6].port == meta.meta_bp_v7_hop;
+        hdr.srecoveryPath[0].bos = 0;
+        hdr.srecoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.srecoveryPath[1].bos = 0;
+        hdr.srecoveryPath[1].port = meta.meta_bp_v2_hop;
+        hdr.srecoveryPath[2].bos = 0;
+        hdr.srecoveryPath[2].port = meta.meta_bp_v3_hop;
+        hdr.srecoveryPath[3].bos = 0;
+        hdr.srecoveryPath[3].port = meta.meta_bp_v4_hop;
+        hdr.srecoveryPath[4].bos = 0;
+        hdr.srecoveryPath[4].port = meta.meta_bp_v5_hop;
+        hdr.srecoveryPath[5].bos = 0;
+        hdr.srecoveryPath[5].port = meta.meta_bp_v6_hop;
+        hdr.srecoveryPath[6].bos = 1;
+        hdr.srecoveryPath[6].port = meta.meta_bp_v7_hop;
     }
     action update_8_length(){
         hdr.recoveryPath.pushfront(8);
-        hdr.srecoveryPath[0].bos == 0;
-        hdr.srecoveryPath[0].port == meta.meta_bp_v1_hop;
-        hdr.srecoveryPath[1].bos == 0;
-        hdr.srecoveryPath[1].port == meta.meta_bp_v2_hop;
-        hdr.srecoveryPath[2].bos == 0;
-        hdr.srecoveryPath[2].port == meta.meta_bp_v3_hop;
-        hdr.srecoveryPath[3].bos == 0;
-        hdr.srecoveryPath[3].port == meta.meta_bp_v4_hop;
-        hdr.srecoveryPath[4].bos == 0;
-        hdr.srecoveryPath[4].port == meta.meta_bp_v5_hop;
-        hdr.srecoveryPath[5].bos == 0;
-        hdr.srecoveryPath[5].port == meta.meta_bp_v6_hop;
-        hdr.srecoveryPath[6].bos == 0;
-        hdr.srecoveryPath[6].port == meta.meta_bp_v7_hop;
-        hdr.srecoveryPath[7].bos == 1;
-        hdr.srecoveryPath[7].port == meta.meta_bp_v8_hop;
+        hdr.srecoveryPath[0].bos = 0;
+        hdr.srecoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.srecoveryPath[1].bos = 0;
+        hdr.srecoveryPath[1].port = meta.meta_bp_v2_hop;
+        hdr.srecoveryPath[2].bos = 0;
+        hdr.srecoveryPath[2].port = meta.meta_bp_v3_hop;
+        hdr.srecoveryPath[3].bos = 0;
+        hdr.srecoveryPath[3].port = meta.meta_bp_v4_hop;
+        hdr.srecoveryPath[4].bos = 0;
+        hdr.srecoveryPath[4].port = meta.meta_bp_v5_hop;
+        hdr.srecoveryPath[5].bos = 0;
+        hdr.srecoveryPath[5].port = meta.meta_bp_v6_hop;
+        hdr.srecoveryPath[6].bos = 0;
+        hdr.srecoveryPath[6].port = meta.meta_bp_v7_hop;
+        hdr.srecoveryPath[7].bos = 1;
+        hdr.srecoveryPath[7].port = meta.meta_bp_v8_hop;
     }
         
     apply {
