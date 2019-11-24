@@ -317,12 +317,20 @@ control MyIngress(inout headers hdr,
         }
         //if we are doing failover, do we need to decrease ttl?
         if(hdr.ipv4.isValid()){
-            update_ttl;
+            update_ttl();
         }
 
         port_to_mac.apply();//update mac
     }
 }
+
+
+control MyEgress(inout headers hdr,
+                 inout metadata meta,
+                 inout standard_metadata_t standard_metadata) {
+    apply {  }
+}
+
 /*************************************************************************
 *************   C H E C K S U M    C O M P U T A T I O N   **************
 *************************************************************************/
