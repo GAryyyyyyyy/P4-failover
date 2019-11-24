@@ -12,8 +12,8 @@ const bit<16> TYPE_IPV4 = 0x800;
 typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
-typedef bit<3> backup_length_t;
-typedef bit<7> bp_hop_t;
+typedef bit<4> backup_length_t;
+typedef bit<15> bp_hop_t;
 
 header ethernet_t {
     macAddr_t dstAddr;
@@ -23,7 +23,7 @@ header ethernet_t {
 //recover
 header recoveryPath_t {
     bit<1>    bos;
-    bit<7>   port;
+    bit<15>   port;
 }
 header ipv4_t {
     bit<4>    version;
@@ -40,17 +40,16 @@ header ipv4_t {
     ip4Addr_t dstAddr;
 }
 struct metadata{
-    bit<7>  start_port;
     bit<1>  out_port_status;
-    bit<3>  port_backup_length; 
-    bit<7>  meta_bp_v1_hop;
-    bit<7>  meta_bp_v2_hop;
-    bit<7>  meta_bp_v3_hop;
-    bit<7>  meta_bp_v4_hop;
-    bit<7>  meta_bp_v5_hop;
-    bit<7>  meta_bp_v6_hop;
-    bit<7>  meta_bp_v7_hop;
-    bit<7>  meta_bp_v8_hop;
+    bit<4>  port_backup_length; 
+    bit<15>  meta_bp_v1_hop;
+    bit<15>  meta_bp_v2_hop;
+    bit<15>  meta_bp_v3_hop;
+    bit<15>  meta_bp_v4_hop;
+    bit<15>  meta_bp_v5_hop;
+    bit<15>  meta_bp_v6_hop;
+    bit<15>  meta_bp_v7_hop;
+    bit<15>  meta_bp_v8_hop;
 }
 
 
@@ -138,8 +137,8 @@ control MyIngress(inout headers hdr,
             meta.meta_bp_v1_hop=v1;
             meta.meta_bp_v2_hop=v2;
             meta.meta_bp_v3_hop=v3;
-            meta.meta_bp_v5_hop=v4;
-            meta.meta_bp_v6_hop=v5;
+            meta.meta_bp_v4_hop=v4;
+            meta.meta_bp_v5_hop=v5;
             meta.meta_bp_v6_hop=v6;
             meta.meta_bp_v7_hop=v7;
             meta.meta_bp_v8_hop=v8;
@@ -173,7 +172,7 @@ control MyIngress(inout headers hdr,
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
     action recoveryPath_nhop() {
-        standard_metadata.egress_spec = (bit<9>) hdr.recoveryPath[0].port;
+        standard_metadata.egress_spec = (bit<9>)hdr.recoveryPath[0].port;
         hdr.recoveryPath.pop_front(1);
     }
     action update_1_length(){
@@ -185,8 +184,10 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath.push_front(2);
         hdr.recoveryPath[0].bos = 0;
         hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[0].setValid();
         hdr.recoveryPath[1].bos = 1;
         hdr.recoveryPath[1].port = meta.meta_bp_v2_hop;
+        hdr.recoveryPath[1].setValid();
     }
     action update_3_length(){
         hdr.recoveryPath.push_front(3);
@@ -274,7 +275,7 @@ control MyIngress(inout headers hdr,
     }
         
     apply {
-        if (hdr.ipv4.isValid() && !hdr.recoveryPath.isValid()) {
+        if (hdr.ipv4.isValid() && !hdr.recoveryPath[0].isValid()) {
             // Process only non-tunneled IPv4 packets
             ipv4_lpm.apply();
             //1 for failover
@@ -320,7 +321,8 @@ control MyIngress(inout headers hdr,
             update_ttl();
         }
 
-        port_to_mac.apply();//update mac
+        //comment for test
+        //port_to_mac.apply();//update mac
     }
 }
 
