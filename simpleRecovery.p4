@@ -176,21 +176,28 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath.pop_front(1);
     }
     action update_1_length(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH; //important!!
         hdr.recoveryPath.push_front(1);
+        hdr.recoveryPath[0]。setValid();
         hdr.recoveryPath[0].bos = 1;
         hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
     }
     action update_2_length(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH;
         hdr.recoveryPath.push_front(2);
+        hdr.recoveryPath[0]。setValid();
+        hdr.recoveryPath[1]。setValid();
         hdr.recoveryPath[0].bos = 0;
         hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
-        hdr.recoveryPath[0].setValid();
         hdr.recoveryPath[1].bos = 1;
         hdr.recoveryPath[1].port = meta.meta_bp_v2_hop;
-        hdr.recoveryPath[1].setValid();
     }
     action update_3_length(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH;
         hdr.recoveryPath.push_front(3);
+        hdr.recoveryPath[0]。setValid();
+        hdr.recoveryPath[1]。setValid();
+        hdr.recoveryPath[2]。setValid();
         hdr.recoveryPath[0].bos = 0;
         hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
         hdr.recoveryPath[1].bos = 0;
@@ -199,7 +206,12 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[2].port = meta.meta_bp_v3_hop;
     }
     action update_4_length(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH;
         hdr.recoveryPath.push_front(4);
+        hdr.recoveryPath[0]。setValid();
+        hdr.recoveryPath[1]。setValid();
+        hdr.recoveryPath[2]。setValid();
+        hdr.recoveryPath[3]。setValid();
         hdr.recoveryPath[0].bos = 0;
         hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
         hdr.recoveryPath[1].bos = 0;
@@ -210,7 +222,13 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[3].port = meta.meta_bp_v4_hop;
     }
     action update_5_length(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH;
         hdr.recoveryPath.push_front(5);
+        hdr.recoveryPath[0]。setValid();
+        hdr.recoveryPath[1]。setValid();
+        hdr.recoveryPath[2]。setValid();
+        hdr.recoveryPath[3]。setValid();
+        hdr.recoveryPath[4]。setValid();
         hdr.recoveryPath[0].bos = 0;
         hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
         hdr.recoveryPath[1].bos = 0;
@@ -223,7 +241,14 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[4].port = meta.meta_bp_v5_hop;
     }
     action update_6_length(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH;
         hdr.recoveryPath.push_front(6);
+        hdr.recoveryPath[0]。setValid();
+        hdr.recoveryPath[1]。setValid();
+        hdr.recoveryPath[2]。setValid();
+        hdr.recoveryPath[3]。setValid();
+        hdr.recoveryPath[4]。setValid();
+        hdr.recoveryPath[5]。setValid();
         hdr.recoveryPath[0].bos = 0;
         hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
         hdr.recoveryPath[1].bos = 0;
@@ -238,7 +263,15 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[5].port = meta.meta_bp_v6_hop;
     }
     action update_7_length(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH;
         hdr.recoveryPath.push_front(7);
+        hdr.recoveryPath[0]。setValid();
+        hdr.recoveryPath[1]。setValid();
+        hdr.recoveryPath[2]。setValid();
+        hdr.recoveryPath[3]。setValid();
+        hdr.recoveryPath[4]。setValid();
+        hdr.recoveryPath[5]。setValid();
+        hdr.recoveryPath[6]。setValid();
         hdr.recoveryPath[0].bos = 0;
         hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
         hdr.recoveryPath[1].bos = 0;
@@ -255,7 +288,16 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[6].port = meta.meta_bp_v7_hop;
     }
     action update_8_length(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH;
         hdr.recoveryPath.push_front(8);
+        hdr.recoveryPath[0]。setValid();
+        hdr.recoveryPath[1]。setValid();
+        hdr.recoveryPath[2]。setValid();
+        hdr.recoveryPath[3]。setValid();
+        hdr.recoveryPath[4]。setValid();
+        hdr.recoveryPath[5]。setValid();
+        hdr.recoveryPath[6]。setValid();
+        hdr.recoveryPath[7]。setValid();
         hdr.recoveryPath[0].bos = 0;
         hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
         hdr.recoveryPath[1].bos = 0;
@@ -284,25 +326,25 @@ control MyIngress(inout headers hdr,
                 if(meta.port_backup_length == 1){
                     update_1_length();
                 }
-                if(meta.port_backup_length == 2){
+                else if(meta.port_backup_length == 2){
                     update_2_length();
                 }
-                if(meta.port_backup_length == 3){
+                else if(meta.port_backup_length == 3){
                     update_3_length();
                 }
-                if(meta.port_backup_length == 4){
+                else if(meta.port_backup_length == 4){
                     update_4_length();
                 }
-                if(meta.port_backup_length == 5){
+                else if(meta.port_backup_length == 5){
                     update_5_length();
                 }
-                if(meta.port_backup_length == 6){
+                else if(meta.port_backup_length == 6){
                     update_6_length();
                 }
-                if(meta.port_backup_length == 7){
+                else if(meta.port_backup_length == 7){
                     update_7_length();
                 }
-                if(meta.port_backup_length == 8){
+                else if(meta.port_backup_length == 8){
                     update_8_length();
                 }
             }
