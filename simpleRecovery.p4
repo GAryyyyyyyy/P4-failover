@@ -3,8 +3,8 @@
 
 const bit<16> TYPE_RECOVERYPATH = 0x1212;
 const bit<16> TYPE_IPV4 = 0x800;
-#define MAX_HOPS 8;
-#define MAX_PORTS 128;
+#define MAX_HOPS 8
+#define MAX_PORTS 128
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
 *************************************************************************/
@@ -12,6 +12,8 @@ const bit<16> TYPE_IPV4 = 0x800;
 typedef bit<9>  egressSpec_t;
 typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
+typedef bit<3> backup_length_t;
+typedef bit<7> bp_hop_t;
 
 header ethernet_t {
     macAddr_t dstAddr;
@@ -62,7 +64,7 @@ struct headers {
 *************************************************************************/
 parser MyParser(packet_in packet,
                 out headers hdr,
-                inout metadata_t meta,
+                inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
     state start {
         transition parse_ethernet;
@@ -122,7 +124,7 @@ control MyIngress(inout headers hdr,
         key = {
             hdr.ipv4.dstAddr: lpm;
         }
-        action = {
+        actions = {
             try_ipv4_forward;
             drop;
             NoAction;
@@ -131,7 +133,7 @@ control MyIngress(inout headers hdr,
         default_action = drop();
     }
 
-    action copy_path(backup_length_t length,bp_v1_hop_t v1,bp_v2_hop_t v2,bp_v3_hop_t v3,bp_v4_hop_t v4,bp_v5_hop_t v5,bp_v6_hop_t v6,bp_v7_hop_t v7,bp_v8_hop_t v8){
+    action copy_path(backup_length_t length, bp_hop_t v1, bp_hop_t v2, bp_hop_t v3, bp_hop_t v4, bp_hop_t v5, bp_hop_t v6, bp_hop_t v7, bp_hop_t v8){
             meta.port_backup_length=length;
             meta.meta_bp_v1_hop=v1;
             meta.meta_bp_v2_hop=v2;
@@ -159,7 +161,7 @@ control MyIngress(inout headers hdr,
         key = {
             standard_metadata.egress_spec: exact;
         }
-        action = {
+        actions = {
             update_mac_addr;
         }
     ]
@@ -317,7 +319,7 @@ control MyIngress(inout headers hdr,
         if(hdr.ipv4.isValid()){
             update_ttl;
         }
-        
+
         port_to_mac.apply();//update mac
     }
 }
