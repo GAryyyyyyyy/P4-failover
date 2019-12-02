@@ -32,6 +32,16 @@
       "action_params": {
         "port": 1
       }
+    },
+    {
+      "table": "MyIngress.edge_to_port",
+      "match": {
+        "meta.out_edge": [2]
+      },
+      "action_name": "MyIngress.recovery_forward",
+      "action_params": {
+        "port": 3
+      }
     }
   ]
 }

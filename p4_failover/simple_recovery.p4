@@ -23,7 +23,7 @@ header ethernet_t {
 //recover
 header recoveryPath_t {
     bit<1>    bos;
-    bit<15>   port;
+    bit<15>   edge;
 }
 header ipv4_t {
     bit<4>    version;
@@ -42,6 +42,7 @@ header ipv4_t {
 struct metadata{
     bit<1>  out_port_status;
     bit<4>  port_backup_length; 
+    bit<15>  out_edge;
     bit<15>  meta_bp_v1_hop;
     bit<15>  meta_bp_v2_hop;
     bit<15>  meta_bp_v3_hop;
@@ -156,12 +157,26 @@ control MyIngress(inout headers hdr,
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
     }
-    table port_to_mac {
+
+    // table port_to_mac {
+    //     key = {
+    //         standard_metadata.egress_spec: exact;
+    //     }
+    //     actions = {
+    //         update_mac_addr;
+    //     }
+    // }
+
+    action recovery_forward(egressSpec_t port) {
+        standard_metadata.egress_spec = port;
+    }
+
+    table edge_to_port {
         key = {
-            standard_metadata.egress_spec: exact;
+            meta.out_edge: exact;
         }
         actions = {
-            update_mac_addr;
+            recovery_forward;
         }
     }
 
@@ -172,7 +187,7 @@ control MyIngress(inout headers hdr,
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
     action recoveryPath_nhop() {
-        standard_metadata.egress_spec = (bit<9>)hdr.recoveryPath[0].port;
+        meta.out_edge = hdr.recoveryPath[0].edge;
         hdr.recoveryPath.pop_front(1);
     }
     action update_1_length(){
@@ -180,7 +195,7 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath.push_front(1);
         hdr.recoveryPath[0].setValid();
         hdr.recoveryPath[0].bos = 1;
-        hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
     }
     action update_2_length(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH;
@@ -188,9 +203,9 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[0].setValid();
         hdr.recoveryPath[1].setValid();
         hdr.recoveryPath[0].bos = 0;
-        hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
         hdr.recoveryPath[1].bos = 1;
-        hdr.recoveryPath[1].port = meta.meta_bp_v2_hop;
+        hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
     }
     action update_3_length(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH;
@@ -199,11 +214,11 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[1].setValid();
         hdr.recoveryPath[2].setValid();
         hdr.recoveryPath[0].bos = 0;
-        hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
         hdr.recoveryPath[1].bos = 0;
-        hdr.recoveryPath[1].port = meta.meta_bp_v2_hop;
+        hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
         hdr.recoveryPath[2].bos = 0;
-        hdr.recoveryPath[2].port = meta.meta_bp_v3_hop;
+        hdr.recoveryPath[2].edge = meta.meta_bp_v3_hop;
     }
     action update_4_length(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH;
@@ -213,13 +228,13 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[2].setValid();
         hdr.recoveryPath[3].setValid();
         hdr.recoveryPath[0].bos = 0;
-        hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
         hdr.recoveryPath[1].bos = 0;
-        hdr.recoveryPath[1].port = meta.meta_bp_v2_hop;
+        hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
         hdr.recoveryPath[2].bos = 0;
-        hdr.recoveryPath[2].port = meta.meta_bp_v3_hop;
+        hdr.recoveryPath[2].edge = meta.meta_bp_v3_hop;
         hdr.recoveryPath[3].bos = 1;
-        hdr.recoveryPath[3].port = meta.meta_bp_v4_hop;
+        hdr.recoveryPath[3].edge = meta.meta_bp_v4_hop;
     }
     action update_5_length(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH;
@@ -230,15 +245,15 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[3].setValid();
         hdr.recoveryPath[4].setValid();
         hdr.recoveryPath[0].bos = 0;
-        hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
         hdr.recoveryPath[1].bos = 0;
-        hdr.recoveryPath[1].port = meta.meta_bp_v2_hop;
+        hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
         hdr.recoveryPath[2].bos = 0;
-        hdr.recoveryPath[2].port = meta.meta_bp_v3_hop;
+        hdr.recoveryPath[2].edge = meta.meta_bp_v3_hop;
         hdr.recoveryPath[3].bos = 0;
-        hdr.recoveryPath[3].port = meta.meta_bp_v4_hop;
+        hdr.recoveryPath[3].edge = meta.meta_bp_v4_hop;
         hdr.recoveryPath[4].bos = 1;
-        hdr.recoveryPath[4].port = meta.meta_bp_v5_hop;
+        hdr.recoveryPath[4].edge = meta.meta_bp_v5_hop;
     }
     action update_6_length(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH;
@@ -250,17 +265,17 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[4].setValid();
         hdr.recoveryPath[5].setValid();
         hdr.recoveryPath[0].bos = 0;
-        hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
         hdr.recoveryPath[1].bos = 0;
-        hdr.recoveryPath[1].port = meta.meta_bp_v2_hop;
+        hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
         hdr.recoveryPath[2].bos = 0;
-        hdr.recoveryPath[2].port = meta.meta_bp_v3_hop;
+        hdr.recoveryPath[2].edge = meta.meta_bp_v3_hop;
         hdr.recoveryPath[3].bos = 0;
-        hdr.recoveryPath[3].port = meta.meta_bp_v4_hop;
+        hdr.recoveryPath[3].edge = meta.meta_bp_v4_hop;
         hdr.recoveryPath[4].bos = 0;
-        hdr.recoveryPath[4].port = meta.meta_bp_v5_hop;
+        hdr.recoveryPath[4].edge = meta.meta_bp_v5_hop;
         hdr.recoveryPath[5].bos = 1;
-        hdr.recoveryPath[5].port = meta.meta_bp_v6_hop;
+        hdr.recoveryPath[5].edge = meta.meta_bp_v6_hop;
     }
     action update_7_length(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH;
@@ -273,19 +288,19 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[5].setValid();
         hdr.recoveryPath[6].setValid();
         hdr.recoveryPath[0].bos = 0;
-        hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
         hdr.recoveryPath[1].bos = 0;
-        hdr.recoveryPath[1].port = meta.meta_bp_v2_hop;
+        hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
         hdr.recoveryPath[2].bos = 0;
-        hdr.recoveryPath[2].port = meta.meta_bp_v3_hop;
+        hdr.recoveryPath[2].edge = meta.meta_bp_v3_hop;
         hdr.recoveryPath[3].bos = 0;
-        hdr.recoveryPath[3].port = meta.meta_bp_v4_hop;
+        hdr.recoveryPath[3].edge = meta.meta_bp_v4_hop;
         hdr.recoveryPath[4].bos = 0;
-        hdr.recoveryPath[4].port = meta.meta_bp_v5_hop;
+        hdr.recoveryPath[4].edge = meta.meta_bp_v5_hop;
         hdr.recoveryPath[5].bos = 0;
-        hdr.recoveryPath[5].port = meta.meta_bp_v6_hop;
+        hdr.recoveryPath[5].edge = meta.meta_bp_v6_hop;
         hdr.recoveryPath[6].bos = 1;
-        hdr.recoveryPath[6].port = meta.meta_bp_v7_hop;
+        hdr.recoveryPath[6].edge = meta.meta_bp_v7_hop;
     }
     action update_8_length(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH;
@@ -299,21 +314,21 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[6].setValid();
         hdr.recoveryPath[7].setValid();
         hdr.recoveryPath[0].bos = 0;
-        hdr.recoveryPath[0].port = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
         hdr.recoveryPath[1].bos = 0;
-        hdr.recoveryPath[1].port = meta.meta_bp_v2_hop;
+        hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
         hdr.recoveryPath[2].bos = 0;
-        hdr.recoveryPath[2].port = meta.meta_bp_v3_hop;
+        hdr.recoveryPath[2].edge = meta.meta_bp_v3_hop;
         hdr.recoveryPath[3].bos = 0;
-        hdr.recoveryPath[3].port = meta.meta_bp_v4_hop;
+        hdr.recoveryPath[3].edge = meta.meta_bp_v4_hop;
         hdr.recoveryPath[4].bos = 0;
-        hdr.recoveryPath[4].port = meta.meta_bp_v5_hop;
+        hdr.recoveryPath[4].edge = meta.meta_bp_v5_hop;
         hdr.recoveryPath[5].bos = 0;
-        hdr.recoveryPath[5].port = meta.meta_bp_v6_hop;
+        hdr.recoveryPath[5].edge = meta.meta_bp_v6_hop;
         hdr.recoveryPath[6].bos = 0;
-        hdr.recoveryPath[6].port = meta.meta_bp_v7_hop;
+        hdr.recoveryPath[6].edge = meta.meta_bp_v7_hop;
         hdr.recoveryPath[7].bos = 1;
-        hdr.recoveryPath[7].port = meta.meta_bp_v8_hop;
+        hdr.recoveryPath[7].edge = meta.meta_bp_v8_hop;
     }
         
     apply {
@@ -357,6 +372,7 @@ control MyIngress(inout headers hdr,
             }
             // process tunneled packets
             recoveryPath_nhop();
+            edge_to_port.apply();
         }
         //if we are doing failover, do we need to decrease ttl?
         if(hdr.ipv4.isValid()){
