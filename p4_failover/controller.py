@@ -75,8 +75,52 @@ class SwitchTopo:
             links.append(link_dict)
         return links
 
+def dfs_backup(topo, s, d):
+    stack = [[("",s)]]
+    visited = [s]
+    while stack:
+        cur_state = stack.pop()
+        edge, node = cur_state[-1]
+        adj_nodes = topo.adj[node]
+        for cur_node in adj_nodes:
+            if cur_node in visited:
+                continue
+            if cur_node == d:
+                if node != s:
+                    cur_state.append((topo[node][cur_node]['name'], cur_node))
+                    return cur_state
+                else:
+                    continue    
+            stack.append(cur_state)
+            new_state = cur_state[:]
+            new_state.append((topo[node][cur_node]['name'], cur_node))
+            stack.append(new_state)
+            break
+    return [("", None)]
+
+def backup_path_to_bmv2_config(topo, path):
+    bmv2_config = []
+    edge,src_node = path[0]
+    for i in range(1,len(path)):
+        edge, dst_node = path[i]
+        bmv2_config.append((src_node, edge, topo.nodes[src_node][edge]))
+        src_node = dst_node
+    return bmv2_config
+
+def calculate_backup_path(topo):
+    for link in topo.edges:
+        backup_path = dfs_backup(topo, link[0], link[1])
+        print(backup_path)
+        backup_path_config = backup_path_to_bmv2_config(topo, backup_path)
+        print(backup_path_config)
+        backup_path = dfs_backup(topo, link[1], link[0])
+        print(backup_path)
+        backup_path_config = backup_path_to_bmv2_config(topo, backup_path)
+        print(backup_path_config)
+
 
 if __name__ == '__main__':
     topo_file = "topo/topology.json"
     topo = SwitchTopo(topo_file)
     switch_only_topo = topo.get_networkx_topo()
+    calculate_backup_path(switch_only_topo)
