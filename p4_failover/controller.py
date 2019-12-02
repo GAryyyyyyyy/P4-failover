@@ -1,5 +1,15 @@
 import json
 import networkx as nx
+import grpc
+import os
+import sys
+sys.path.append(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                 '../utils/'))
+import p4runtime_lib.bmv2
+from p4runtime_lib.error_utils import printGrpcError
+from p4runtime_lib.switch import ShutdownAllSwitchConnections
+import p4runtime_lib.helper
 
 class SwitchTopo:
     def __init__(self, topo_file):
@@ -119,8 +129,76 @@ def calculate_backup_path(topo):
         print(backup_path_config)
 
 
+def write_failover_config(p4info_helper, sw):
+    table_entry = p4info_helper.buildTableEntry(
+        table_name="MyIngress.edge_to_port",
+        match_fields={
+            "meta.out_edge": (2)
+        },
+        action_name="MyIngress.recovery_forward",
+        action_params={
+            "port": 3,
+        }
+    )
+    sw.WriteTableEntry(table_entry)
+    print "Installed edge to port rule on %s" % sw.name
+
+def setup_connection(p4info_file_path, bmv2_file_path):
+    p4info_helper = p4runtime_lib.helper.P4InfoHelper(p4info_file_path)
+    try:
+        # s1 = p4runtime_lib.bmv2.Bmv2SwitchConnection(
+        #     name='s1',
+        #     address='127.0.0.1:50051',
+        #     device_id=0,
+        #     # proto_dump_file='logs/s1-p4runtime-requests.txt'
+        #     )
+        s3 = p4runtime_lib.bmv2.Bmv2SwitchConnection(
+            name='s3',
+            address='127.0.0.1:50053',
+            device_id=2,
+            # proto_dump_file='logs/s3-p4runtime-requests.txt'
+            )
+
+        # Send master arbitration update message to establish this controller as
+        # master (required by P4Runtime before performing any other write operation)
+        # s1.MasterArbitrationUpdate()
+        s3.MasterArbitrationUpdate()
+
+        # Install the P4 program on the switches
+        # s1.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
+        #                                bmv2_json_file_path=bmv2_file_path)
+        # print "Installed P4 Program using SetForwardingPipelineConfig on s1"
+        # s2.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
+        #                                bmv2_json_file_path=bmv2_file_path)
+        # print "Installed P4 Program using SetForwardingPipelineConfig on s3"
+
+        write_failover_config(p4info_helper, s3)
+
+    except KeyboardInterrupt:
+        print " Shutting down."
+    except grpc.RpcError as e:
+        printGrpcError(e)
+
+    ShutdownAllSwitchConnections()
+
 if __name__ == '__main__':
-    topo_file = "topo/topology.json"
-    topo = SwitchTopo(topo_file)
-    switch_only_topo = topo.get_networkx_topo()
-    calculate_backup_path(switch_only_topo)
+    # topo_file = "topo/topology.json"
+    # topo = SwitchTopo(topo_file)
+    # switch_only_topo = topo.get_networkx_topo()
+    # calculate_backup_path(switch_only_topo)
+    setup_connection('./build/simple_recovery.p4.p4info.txt', './build/simple_recovery.json')
+
+
+
+
+
+    #     {
+    #   "table": "MyIngress.edge_to_port",
+    #   "match": {
+    #     "meta.out_edge": [2]
+    #   },
+    #   "action_name": "MyIngress.recovery_forward",
+    #   "action_params": {
+    #     "port": 3
+    #   }
+    # }
