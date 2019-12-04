@@ -42,7 +42,6 @@ def push_backup_paths_to_switches(p4info_file_path, switches, backup_paths):
             continue
         sw = switches[switch_name]
         formated_path = _format_backup_path(path)
-        print formated_path
         table_entry = p4info_helper.buildTableEntry(
             table_name="MyIngress.port_backup_path",
             match_fields={
@@ -89,7 +88,6 @@ def populate_edge_to_port_table(p4info_file_path, switches, topo):
         for edge_name in topo.nodes[node]:
             port = topo.nodes[node][edge_name]
             edge = int(edge_name[5:])
-            print port, edge
             table_entry = p4info_helper.buildTableEntry(
                 table_name="MyIngress.edge_to_port",
                 match_fields={

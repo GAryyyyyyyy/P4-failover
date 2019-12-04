@@ -2,10 +2,10 @@ import os
 import sys
 sys.path.append(
     os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                 '../../utils/'))
+                 '../utils/'))
 
-from topo_lib import JsonTopo
-from p4_failover_lib import *
+from p4failover_lib.topo_lib import JsonTopo
+from p4failover_lib.p4_failover_lib import *
 from p4runtime_lib.switch import ShutdownAllSwitchConnections
 
 def dfs_backup(topo, s, d):
@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
     #Step 2: calculate backup path using different algorithm e.g. dfs bfs and so on
     backup_paths = calculate_backup_paths(topo)
-    print(backup_paths)
+    print 'back up paths:\n', backup_paths
 
     #step 3: set up connection with each switch
     switches = {}
@@ -86,6 +86,7 @@ if __name__ == '__main__':
     populate_edge_to_port_table(p4info_file_path, switches, topo)
 
     #step 6: shut down connection with switch
+    #I am not sure are these necessary?---by house
     # switches['s1'].shutdown()
     # switches['s2'].shutdown()
     # switches['s3'].shutdown()
