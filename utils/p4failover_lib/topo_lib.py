@@ -79,5 +79,14 @@ if __name__ == '__main__':
     topo_file = "../../p4_failover/topo/topology.json"
     jsonTopo = JsonTopo(topo_file)
     topo = jsonTopo.get_networkx_topo()
-    nx.draw(topo, with_labels=True, font_weight='bold')
+    
+    pos = nx.spring_layout(topo)
+    nx.draw(topo, pos, node_size=3000)
+    # generate node labels
+    node_labels = {}
+    for node in topo.nodes:
+        node_labels[node] = node + '\n' + str(topo.nodes[node])
+    nx.draw_networkx_labels(topo, pos, labels=node_labels)
+    edge_labels = nx.get_edge_attributes(topo, 'name')
+    nx.draw_networkx_edge_labels(topo, pos, edge_labels)
     plt.show()
