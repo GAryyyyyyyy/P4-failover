@@ -1,10 +1,11 @@
-from topo_lib import JsonTopo
-from p4_failover_lib import *
 import os
 import sys
 sys.path.append(
     os.path.join(os.path.dirname(os.path.abspath(__file__)),
                  '../../utils/'))
+
+from topo_lib import JsonTopo
+from p4_failover_lib import *
 from p4runtime_lib.switch import ShutdownAllSwitchConnections
 
 def dfs_backup(topo, s, d):

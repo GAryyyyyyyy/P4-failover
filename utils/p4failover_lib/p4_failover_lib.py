@@ -1,11 +1,9 @@
 import grpc
 import os
 import sys
-from switch_only_topo import SwitchTopo
-import p4_failover_lib
 sys.path.append(
     os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                 '../utils/'))
+                 '../../utils/'))
 import p4runtime_lib.bmv2
 from p4runtime_lib.error_utils import printGrpcError
 from p4runtime_lib.switch import ShutdownAllSwitchConnections
