@@ -1,5 +1,6 @@
 import json
 import networkx as nx
+import matplotlib.pyplot as plt
 
 class JsonTopo:
     def __init__(self, topo_file):
@@ -13,6 +14,7 @@ class JsonTopo:
         topo = nx.Graph()
         edge_num = 0
         for sw, params in self.switches.iteritems():
+        # for sw, params in self.switches.items():
             topo.add_node(sw)
         
         #assumes host always comes first for host<--->switch links
@@ -72,3 +74,10 @@ class JsonTopo:
                 assert link_dict['node2'][0] == 's', 'Hosts should be connected to switches, not ' + str(link_dict['node2'])
             links.append(link_dict)
         return links
+
+if __name__ == '__main__':
+    topo_file = "../../p4_failover/topo/topology.json"
+    jsonTopo = JsonTopo(topo_file)
+    topo = jsonTopo.get_networkx_topo()
+    nx.draw(topo, with_labels=True, font_weight='bold')
+    plt.show()
