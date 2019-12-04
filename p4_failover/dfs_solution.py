@@ -1,4 +1,4 @@
-from switch_only_topo import SwitchTopo
+from topo_lib import JsonTopo
 from p4_failover_lib import *
 import os
 import sys
@@ -31,6 +31,10 @@ def dfs_backup(topo, s, d):
     return [("", None)]
 
 def calculate_backup_paths(topo):
+    '''calculate backup path for each edge
+    return a list.
+    each list item is a dict {'switch':switch, 'port':port, 'backup_path':path}
+    '''
     backup_path_list = []
     for link in topo.edges:
         backup_path = dfs_backup(topo, link[0], link[1])
@@ -56,8 +60,8 @@ def write_failover_config(p4info_helper, sw):
 if __name__ == '__main__':
     #Step 1: construct topo using networkx
     topo_file = "topo/topology.json"
-    switchTopo = SwitchTopo(topo_file)
-    topo = switchTopo.get_networkx_topo()
+    jsonTopo = JsonTopo(topo_file)
+    topo = jsonTopo.get_networkx_topo()
 
     #Step 2: calculate backup path using different algorithm e.g. dfs bfs and so on
     backup_paths = calculate_backup_paths(topo)
@@ -70,6 +74,9 @@ if __name__ == '__main__':
     switches['s1'] = setup_connection(p4info_file_path, bmv2_file_path, 's1', '127.0.0.1:50051', 0)
     switches['s2'] = setup_connection(p4info_file_path, bmv2_file_path, 's2', '127.0.0.1:50052', 1)
     switches['s3'] = setup_connection(p4info_file_path, bmv2_file_path, 's3', '127.0.0.1:50053', 2)
+    # switches['s1'] = 'helo'
+    # switches['s2'] = 'helo'
+    # switches['s3'] = 'helo'
 
     #step 4: push backup paths to each switch
     push_backup_paths_to_switches(p4info_file_path ,switches, backup_paths)
@@ -77,5 +84,42 @@ if __name__ == '__main__':
     #step 5: populate edge_to_port table
     populate_edge_to_port_table(p4info_file_path, switches, topo)
 
+    #step 6: shut down connection with switch
+    # switches['s1'].shutdown()
+    # switches['s2'].shutdown()
+    # switches['s3'].shutdown()
+
     # setup_connection('./build/simple_recovery.p4.p4info.txt', './build/simple_recovery.json')
     # ShutdownAllSwitchConnections()
+
+
+
+    #     {
+    #   "table": "MyIngress.port_backup_path",
+    #   "match": {
+    #     "standard_metadata.egress_spec": [2]
+    #   },
+    #   "action_name": "MyIngress.copy_path",
+    #   "action_params": {
+    #     "length": 2,
+    #     "v1": 1,
+    #     "v2": 2,
+    #     "v3": 0,
+    #     "v4": 0,
+    #     "v5": 0,
+    #     "v6": 0,
+    #     "v7": 0,
+    #     "v8": 0
+    #   }
+    # },
+
+    # {
+    #   "table": "MyIngress.edge_to_port",
+    #   "match": {
+    #     "meta.out_edge": [1]
+    #   },
+    #   "action_name": "MyIngress.recovery_forward",
+    #   "action_params": {
+    #     "port": 3
+    #   }
+    # }

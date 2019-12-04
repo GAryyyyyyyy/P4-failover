@@ -1,7 +1,7 @@
 import json
 import networkx as nx
 
-class SwitchTopo:
+class JsonTopo:
     def __init__(self, topo_file):
         with open(topo_file, 'r') as f:
             topo = json.load(f)

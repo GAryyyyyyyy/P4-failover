@@ -44,25 +44,26 @@ def push_backup_paths_to_switches(p4info_file_path, switches, backup_paths):
             continue
         sw = switches[switch_name]
         formated_path = _format_backup_path(path)
-        # table_entry = p4info_helper.buildTableEntry(
-        #     table_name="MyIngress.port_backup_path",
-        #     match_fields={
-        #         "standard_metadata.egress_spec": (port)
-        #     },
-        #     action_name="MyIngress.copy_path",
-        #     action_params={
-        #         "length": len(backup_path),
-        #         "v1": formated_path[0],
-        #         "v2": formated_path[1],
-        #         "v3": formated_path[2],
-        #         "v4": formated_path[3],
-        #         "v5": formated_path[4],
-        #         "v6": formated_path[5],
-        #         "v7": formated_path[6],
-        #         "v8": formated_path[7],
-        #     }
-        # )
-        # sw.WriteTableEntry(table_entry)
+        print formated_path
+        table_entry = p4info_helper.buildTableEntry(
+            table_name="MyIngress.port_backup_path",
+            match_fields={
+                "standard_metadata.egress_spec": (port)
+            },
+            action_name="MyIngress.copy_path",
+            action_params={
+                "length": len(path) - 1,
+                "v1": formated_path[0],
+                "v2": formated_path[1],
+                "v3": formated_path[2],
+                "v4": formated_path[3],
+                "v5": formated_path[4],
+                "v6": formated_path[5],
+                "v7": formated_path[6],
+                "v8": formated_path[7],
+            }
+        )
+        sw.WriteTableEntry(table_entry)
 
 def setup_connection(p4info_file_path, bmv2_file_path, name, address, device_id):
     p4info_helper = p4runtime_lib.helper.P4InfoHelper(p4info_file_path)
@@ -90,14 +91,15 @@ def populate_edge_to_port_table(p4info_file_path, switches, topo):
         for edge_name in topo.nodes[node]:
             port = topo.nodes[node][edge_name]
             edge = int(edge_name[5:])
-            # table_entry = p4info_helper.buildTableEntry(
-            #     table_name="MyIngress.edge_to_port",
-            #     match_fields={
-            #         "meta.out_edge": (edge)
-            #     },
-            #     action_name="MyIngress.recovery_forward",
-            #     action_params={
-            #         "port": port,
-            #     }
-            # )
-            # sw.WriteTableEntry(table_entry)
+            print port, edge
+            table_entry = p4info_helper.buildTableEntry(
+                table_name="MyIngress.edge_to_port",
+                match_fields={
+                    "meta.out_edge": (edge)
+                },
+                action_name="MyIngress.recovery_forward",
+                action_params={
+                    "port": port,
+                }
+            )
+            sw.WriteTableEntry(table_entry)
