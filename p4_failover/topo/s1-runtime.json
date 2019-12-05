@@ -32,25 +32,6 @@
       "action_params": {
         "port": 3
       }
-    },
-
-    {
-      "table": "MyIngress.port_backup_path",
-      "match": {
-        "standard_metadata.egress_spec": [2]
-      },
-      "action_name": "MyIngress.copy_path",
-      "action_params": {
-        "length": 2,
-        "v1": 3,
-        "v2": 3,
-        "v3": 0,
-        "v4": 0,
-        "v5": 0,
-        "v6": 0,
-        "v7": 0,
-        "v8": 0
-      }
     }
   ]
 }
