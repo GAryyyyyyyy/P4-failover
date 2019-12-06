@@ -230,7 +230,7 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
         hdr.recoveryPath[1].bos = 0;
         hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
-        hdr.recoveryPath[2].bos = 0;
+        hdr.recoveryPath[2].bos = 1;
         hdr.recoveryPath[2].edge = meta.meta_bp_v3_hop;
     }
     action add_header_normal_4(){
