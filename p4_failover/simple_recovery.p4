@@ -3,7 +3,7 @@
 
 const bit<16> TYPE_RECOVERYPATH = 0x1212;
 const bit<16> TYPE_IPV4 = 0x800;
-#define MAX_HOPS 8
+#define MAX_HOPS 32
 #define MAX_PORTS 128
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -190,14 +190,14 @@ control MyIngress(inout headers hdr,
         meta.out_edge = hdr.recoveryPath[0].edge;
         hdr.recoveryPath.pop_front(1);
     }
-    action update_1_length(){
+    action add_header_normal_1(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH; //important!!
         hdr.recoveryPath.push_front(1);
         hdr.recoveryPath[0].setValid();
         hdr.recoveryPath[0].bos = 1;
         hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
     }
-    action update_2_length(){
+    action add_header_normal_2(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH;
         hdr.recoveryPath.push_front(2);
         hdr.recoveryPath[0].setValid();
@@ -207,7 +207,7 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[1].bos = 1;
         hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
     }
-    action update_3_length(){
+    action add_header_normal_3(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH;
         hdr.recoveryPath.push_front(3);
         hdr.recoveryPath[0].setValid();
@@ -220,7 +220,7 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[2].bos = 0;
         hdr.recoveryPath[2].edge = meta.meta_bp_v3_hop;
     }
-    action update_4_length(){
+    action add_header_normal_4(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH;
         hdr.recoveryPath.push_front(4);
         hdr.recoveryPath[0].setValid();
@@ -236,7 +236,7 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[3].bos = 1;
         hdr.recoveryPath[3].edge = meta.meta_bp_v4_hop;
     }
-    action update_5_length(){
+    action add_header_normal_5(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH;
         hdr.recoveryPath.push_front(5);
         hdr.recoveryPath[0].setValid();
@@ -255,7 +255,7 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[4].bos = 1;
         hdr.recoveryPath[4].edge = meta.meta_bp_v5_hop;
     }
-    action update_6_length(){
+    action add_header_normal_6(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH;
         hdr.recoveryPath.push_front(6);
         hdr.recoveryPath[0].setValid();
@@ -277,7 +277,7 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[5].bos = 1;
         hdr.recoveryPath[5].edge = meta.meta_bp_v6_hop;
     }
-    action update_7_length(){
+    action add_header_normal_7(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH;
         hdr.recoveryPath.push_front(7);
         hdr.recoveryPath[0].setValid();
@@ -302,7 +302,7 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[6].bos = 1;
         hdr.recoveryPath[6].edge = meta.meta_bp_v7_hop;
     }
-    action update_8_length(){
+    action add_header_normal_8(){
         hdr.ethernet.etherType = TYPE_RECOVERYPATH;
         hdr.recoveryPath.push_front(8);
         hdr.recoveryPath[0].setValid();
@@ -339,28 +339,28 @@ control MyIngress(inout headers hdr,
             if(meta.out_port_status == 1){
                 port_backup_path.apply();
                 if(meta.port_backup_length == 1){
-                    update_1_length();
+                    add_header_normal_1();
                 }
                 else if(meta.port_backup_length == 2){
-                    update_2_length();
+                    add_header_normal_2();
                 }
                 else if(meta.port_backup_length == 3){
-                    update_3_length();
+                    add_header_normal_3();
                 }
                 else if(meta.port_backup_length == 4){
-                    update_4_length();
+                    add_header_normal_4();
                 }
                 else if(meta.port_backup_length == 5){
-                    update_5_length();
+                    add_header_normal_5();
                 }
                 else if(meta.port_backup_length == 6){
-                    update_6_length();
+                    add_header_normal_6();
                 }
                 else if(meta.port_backup_length == 7){
-                    update_7_length();
+                    add_header_normal_7();
                 }
                 else if(meta.port_backup_length == 8){
-                    update_8_length();
+                    add_header_normal_8();
                 }
             }
         }
