@@ -41,6 +41,8 @@ header ipv4_t {
 }
 struct metadata{
     bit<1>  out_port_status;
+    bit<1>  cur_bos;
+    bit<1>  need_recycle;
     bit<4>  port_backup_length; 
     bit<15>  out_edge;
     bit<15>  meta_bp_v1_hop;
@@ -153,6 +155,15 @@ control MyIngress(inout headers hdr,
         }
     }
 
+    table port_backup_path_fault {
+        key = {
+            standard_metadata.egress_spec: exact;
+        }
+        actions = {
+            copy_path;
+        }
+    }
+
     action update_mac_addr(macAddr_t dstAddr) {
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr;
@@ -169,6 +180,7 @@ control MyIngress(inout headers hdr,
 
     action recovery_forward(egressSpec_t port) {
         standard_metadata.egress_spec = port;
+        all_ports_status.read(meta.out_port_status, (bit<32>)standard_metadata.egress_spec);
     }
 
     table edge_to_port {
@@ -188,6 +200,7 @@ control MyIngress(inout headers hdr,
     }
     action recoveryPath_nhop() {
         meta.out_edge = hdr.recoveryPath[0].edge;
+        meta.cur_bos = hdr.recoveryPath[0].bos;
         hdr.recoveryPath.pop_front(1);
     }
     action add_header_normal_1(){
@@ -330,6 +343,147 @@ control MyIngress(inout headers hdr,
         hdr.recoveryPath[7].bos = 1;
         hdr.recoveryPath[7].edge = meta.meta_bp_v8_hop;
     }
+
+    action add_header_fault_1(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH; //important!!
+        hdr.recoveryPath.push_front(1);
+        hdr.recoveryPath[0].setValid();
+        hdr.recoveryPath[0].bos = meta.cur_bos;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
+    }
+    action add_header_fault_2(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH;
+        hdr.recoveryPath.push_front(2);
+        hdr.recoveryPath[0].setValid();
+        hdr.recoveryPath[1].setValid();
+        hdr.recoveryPath[0].bos = 0;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[1].bos = meta.cur_bos;
+        hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
+    }
+    action add_header_fault_3(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH;
+        hdr.recoveryPath.push_front(3);
+        hdr.recoveryPath[0].setValid();
+        hdr.recoveryPath[1].setValid();
+        hdr.recoveryPath[2].setValid();
+        hdr.recoveryPath[0].bos = 0;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[1].bos = 0;
+        hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
+        hdr.recoveryPath[2].bos = meta.cur_bos;
+        hdr.recoveryPath[2].edge = meta.meta_bp_v3_hop;
+    }
+    action add_header_fault_4(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH;
+        hdr.recoveryPath.push_front(4);
+        hdr.recoveryPath[0].setValid();
+        hdr.recoveryPath[1].setValid();
+        hdr.recoveryPath[2].setValid();
+        hdr.recoveryPath[3].setValid();
+        hdr.recoveryPath[0].bos = 0;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[1].bos = 0;
+        hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
+        hdr.recoveryPath[2].bos = 0;
+        hdr.recoveryPath[2].edge = meta.meta_bp_v3_hop;
+        hdr.recoveryPath[3].bos = meta.cur_bos;
+        hdr.recoveryPath[3].edge = meta.meta_bp_v4_hop;
+    }
+    action add_header_fault_5(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH;
+        hdr.recoveryPath.push_front(5);
+        hdr.recoveryPath[0].setValid();
+        hdr.recoveryPath[1].setValid();
+        hdr.recoveryPath[2].setValid();
+        hdr.recoveryPath[3].setValid();
+        hdr.recoveryPath[4].setValid();
+        hdr.recoveryPath[0].bos = 0;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[1].bos = 0;
+        hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
+        hdr.recoveryPath[2].bos = 0;
+        hdr.recoveryPath[2].edge = meta.meta_bp_v3_hop;
+        hdr.recoveryPath[3].bos = 0;
+        hdr.recoveryPath[3].edge = meta.meta_bp_v4_hop;
+        hdr.recoveryPath[4].bos = meta.cur_bos;
+        hdr.recoveryPath[4].edge = meta.meta_bp_v5_hop;
+    }
+    action add_header_fault_6(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH;
+        hdr.recoveryPath.push_front(6);
+        hdr.recoveryPath[0].setValid();
+        hdr.recoveryPath[1].setValid();
+        hdr.recoveryPath[2].setValid();
+        hdr.recoveryPath[3].setValid();
+        hdr.recoveryPath[4].setValid();
+        hdr.recoveryPath[5].setValid();
+        hdr.recoveryPath[0].bos = 0;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[1].bos = 0;
+        hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
+        hdr.recoveryPath[2].bos = 0;
+        hdr.recoveryPath[2].edge = meta.meta_bp_v3_hop;
+        hdr.recoveryPath[3].bos = 0;
+        hdr.recoveryPath[3].edge = meta.meta_bp_v4_hop;
+        hdr.recoveryPath[4].bos = 0;
+        hdr.recoveryPath[4].edge = meta.meta_bp_v5_hop;
+        hdr.recoveryPath[5].bos = meta.cur_bos;
+        hdr.recoveryPath[5].edge = meta.meta_bp_v6_hop;
+    }
+    action add_header_fault_7(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH;
+        hdr.recoveryPath.push_front(7);
+        hdr.recoveryPath[0].setValid();
+        hdr.recoveryPath[1].setValid();
+        hdr.recoveryPath[2].setValid();
+        hdr.recoveryPath[3].setValid();
+        hdr.recoveryPath[4].setValid();
+        hdr.recoveryPath[5].setValid();
+        hdr.recoveryPath[6].setValid();
+        hdr.recoveryPath[0].bos = 0;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[1].bos = 0;
+        hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
+        hdr.recoveryPath[2].bos = 0;
+        hdr.recoveryPath[2].edge = meta.meta_bp_v3_hop;
+        hdr.recoveryPath[3].bos = 0;
+        hdr.recoveryPath[3].edge = meta.meta_bp_v4_hop;
+        hdr.recoveryPath[4].bos = 0;
+        hdr.recoveryPath[4].edge = meta.meta_bp_v5_hop;
+        hdr.recoveryPath[5].bos = 0;
+        hdr.recoveryPath[5].edge = meta.meta_bp_v6_hop;
+        hdr.recoveryPath[6].bos = meta.cur_bos;
+        hdr.recoveryPath[6].edge = meta.meta_bp_v7_hop;
+    }
+    action add_header_fault_8(){
+        hdr.ethernet.etherType = TYPE_RECOVERYPATH;
+        hdr.recoveryPath.push_front(8);
+        hdr.recoveryPath[0].setValid();
+        hdr.recoveryPath[1].setValid();
+        hdr.recoveryPath[2].setValid();
+        hdr.recoveryPath[3].setValid();
+        hdr.recoveryPath[4].setValid();
+        hdr.recoveryPath[5].setValid();
+        hdr.recoveryPath[6].setValid();
+        hdr.recoveryPath[7].setValid();
+        hdr.recoveryPath[0].bos = 0;
+        hdr.recoveryPath[0].edge = meta.meta_bp_v1_hop;
+        hdr.recoveryPath[1].bos = 0;
+        hdr.recoveryPath[1].edge = meta.meta_bp_v2_hop;
+        hdr.recoveryPath[2].bos = 0;
+        hdr.recoveryPath[2].edge = meta.meta_bp_v3_hop;
+        hdr.recoveryPath[3].bos = 0;
+        hdr.recoveryPath[3].edge = meta.meta_bp_v4_hop;
+        hdr.recoveryPath[4].bos = 0;
+        hdr.recoveryPath[4].edge = meta.meta_bp_v5_hop;
+        hdr.recoveryPath[5].bos = 0;
+        hdr.recoveryPath[5].edge = meta.meta_bp_v6_hop;
+        hdr.recoveryPath[6].bos = 0;
+        hdr.recoveryPath[6].edge = meta.meta_bp_v7_hop;
+        hdr.recoveryPath[7].bos = meta.cur_bos;
+        hdr.recoveryPath[7].edge = meta.meta_bp_v8_hop;
+    }
         
     apply {
         if (hdr.ipv4.isValid() && !hdr.recoveryPath[0].isValid()) {
@@ -367,12 +521,43 @@ control MyIngress(inout headers hdr,
 
 
         if (hdr.recoveryPath[0].isValid()) {
+            // process recovery packet
             if (hdr.recoveryPath[0].bos == 1){
                 recoveryPath_finish();
             }
-            // process tunneled packets
             recoveryPath_nhop();
             edge_to_port.apply();
+            if(meta.out_port_status == 1){
+                //如果在故障恢复的过程中同样碰到了故障，则需要继续增加头部，
+                //但是不需要设置bos为1，除非目前的bos为1
+                //并且，这里需要从入口处再跑一次，也就是recycle一下！
+                meta.need_recycle = 1;
+                port_backup_path_fault.apply();
+                if(meta.port_backup_length == 1){
+                    add_header_fault_1();
+                }
+                else if(meta.port_backup_length == 2){
+                    add_header_fault_2();
+                }
+                else if(meta.port_backup_length == 3){
+                    add_header_fault_3();
+                }
+                else if(meta.port_backup_length == 4){
+                    add_header_fault_4();
+                }
+                else if(meta.port_backup_length == 5){
+                    add_header_fault_5();
+                }
+                else if(meta.port_backup_length == 6){
+                    add_header_fault_6();
+                }
+                else if(meta.port_backup_length == 7){
+                    add_header_fault_7();
+                }
+                else if(meta.port_backup_length == 8){
+                    add_header_fault_8();
+                }
+            }
         }
         //if we are doing failover, do we need to decrease ttl?
         if(hdr.ipv4.isValid()){
@@ -388,7 +573,11 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply {  }
+    apply { 
+        if(meta.need_recycle == 1) {
+            recirculate(standard_metadata);
+        }
+    }
 }
 
 /*************************************************************************
