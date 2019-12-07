@@ -1,9 +1,8 @@
 import os
 import sys
-from heapq import heappop,heappush
+from heapq import heappop, heappush
 sys.path.append(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                 '../utils/'))
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), '../utils/'))
 
 from p4failover_lib.topo_lib import JsonTopo
 from p4failover_lib.p4_failover_lib import *
@@ -13,9 +12,9 @@ from p4runtime_lib.switch import ShutdownAllSwitchConnections
 def path_formater(topo, path):
     result = [('', path[0])]
     src_node = path[0]
-    for i in range (1, len(path)):
+    for i in range(1, len(path)):
         dst_node = path[i]
-        result.append((topo[src_node][dst_node]['name'],dst_node))
+        result.append((topo[src_node][dst_node]['name'], dst_node))
         src_node = dst_node
     return result
 
@@ -35,7 +34,7 @@ def dijkstra_backup(topo, s, d):
                 break
             for new_node in topo.adj[node]:
                 if new_node not in visited:
-                    heappush(q, (cost+1, new_node, path))
+                    heappush(q, (cost + 1, new_node, path))
 
     topo.add_edge(s, d, name=edge_name)
 
@@ -45,7 +44,7 @@ def dijkstra_backup(topo, s, d):
 
 
 def dfs_backup(topo, s, d):
-    stack = [[("",s)]]
+    stack = [[("", s)]]
     visited = [s]
     while stack:
         cur_state = stack.pop()
@@ -59,7 +58,7 @@ def dfs_backup(topo, s, d):
                     cur_state.append((topo[node][cur_node]['name'], cur_node))
                     return cur_state
                 else:
-                    continue    
+                    continue
             stack.append(cur_state)
             new_state = cur_state[:]
             new_state.append((topo[node][cur_node]['name'], cur_node))
@@ -67,18 +66,34 @@ def dfs_backup(topo, s, d):
             break
     return None
 
-def calculate_backup_paths(topo):
+
+def calculate_backup_configs(topo):
     '''calculate backup path for each edge
     return a list.
     each list item is a dict {'switch':switch, 'port':port, 'backup_path':path}
     '''
-    backup_path_list = []
+    backup_config_list = []
     for link in topo.edges:
         backup_path = dijkstra_backup(topo, link[0], link[1])
-        backup_path_list.append({'switch':link[0],'port':topo.nodes[link[0]][topo[link[0]][link[1]]['name']],'backup_path':backup_path})
+        backup_config_list.append({
+            'switch':
+            link[0],
+            'port':
+            topo.nodes[link[0]][topo[link[0]][link[1]]['name']],
+            'backup_path':
+            backup_path
+        })
         backup_path = dijkstra_backup(topo, link[1], link[0])
-        backup_path_list.append({'switch':link[1],'port':topo.nodes[link[1]][topo[link[0]][link[1]]['name']],'backup_path':backup_path})
-    return backup_path_list
+        backup_config_list.append({
+            'switch':
+            link[1],
+            'port':
+            topo.nodes[link[1]][topo[link[0]][link[1]]['name']],
+            'backup_path':
+            backup_path
+        })
+    return backup_config_list
+
 
 def recalculate_backup_path(topo, backup_configs):
     for backup_config in backup_configs:
@@ -87,21 +102,25 @@ def recalculate_backup_path(topo, backup_configs):
             src_sw, dst_sw = backup_path[0]
             new_backup_path = dijkstra_backup(topo, src_sw, dst_sw)
             if new_backup_path != None:
-                print 'Backup path for %s to %s has been recovered!' % (src_sw, dst_sw)
+                print 'Backup path for %s to %s has been recovered!' % (src_sw,
+                                                                        dst_sw)
                 backup_config['backup_path'] = new_backup_path
 
+
 def handle_link_up(sw1, sw2, topo, failing_edges, backup_configs):
-    topo.add_edge(sw1, sw2, name=failing_edges.pop(sw1+sw2))
+    topo.add_edge(sw1, sw2, name=failing_edges.pop(sw1 + sw2))
     recalculate_backup_path(topo, backup_configs)
 
-def handle_link_down(sw1, sw2, topo, failing_edges, backup_configs, p4info_file_path, switches):
+
+def handle_link_down(sw1, sw2, topo, failing_edges, backup_configs,
+                     p4info_file_path, switches):
     down_edge_name = topo[sw1][sw2]["name"]
-    failing_edges[sw1+sw2] = down_edge_name
+    failing_edges[sw1 + sw2] = down_edge_name
     topo.remove_edge(sw1, sw2)
     for backup_config in backup_configs:
         backup_path = backup_config['backup_path']
         if len(backup_path) == 1:
-            continue # the port does not have a backup path yet
+            continue  # the port does not have a backup path yet
         src_sw = backup_path[0][1]
         dst_sw = backup_path[-1][1]
         for edge_name, sw_name in backup_path:
@@ -109,13 +128,17 @@ def handle_link_down(sw1, sw2, topo, failing_edges, backup_configs, p4info_file_
                 #need to recalculate backup path
                 new_backup_path = dijkstra_backup(topo, src_sw, dst_sw)
                 if new_backup_path == None:
-                    print 'Warnning! Cannot find backup path from %s to %s' % (src_sw, dst_sw)
+                    print 'Warnning! Cannot find backup path from %s to %s' % (
+                        src_sw, dst_sw)
                     backup_config['backup_path'] = [(src_sw, dst_sw)]
                 else:
                     backup_config['backup_path'] = new_backup_path
-                    update_backup_config(p4info_file_path, switches, backup_config)
-                    print 'Update new backup path for %s to %s: %s' % (src_sw, dst_sw, str(new_backup_path))
+                    update_backup_config(p4info_file_path, switches,
+                                         backup_config)
+                    print 'Update new backup path for %s to %s: %s' % (
+                        src_sw, dst_sw, str(new_backup_path))
                 break
+
 
 if __name__ == '__main__':
     #Step 1: construct topo using networkx
@@ -124,8 +147,8 @@ if __name__ == '__main__':
     topo = jsonTopo.get_networkx_topo()
 
     #Step 2: calculate backup path using different algorithm e.g. dfs bfs and so on
-    backup_paths = calculate_backup_paths(topo)
-    print 'Initial back up paths:\n', backup_paths
+    backup_configs = calculate_backup_configs(topo)
+    print 'Initial back up paths:\n', backup_configs
 
     #step 3: set up connection with each switch
     switches = {}
@@ -153,8 +176,8 @@ if __name__ == '__main__':
     # switches['s20'] = setup_connection(p4info_file_path, bmv2_file_path, 's20', '127.0.0.1:50070', 19)
 
     # #step 4: push backup paths to each switch
-    # push_backup_paths_to_switches(p4info_file_path ,switches, backup_paths)
-    
+    push_backup_configs_to_switches(p4info_file_path ,switches, backup_configs)
+
     # #step 5: populate edge_to_port table
     # populate_edge_to_port_table(p4info_file_path, switches, topo)
 
@@ -169,14 +192,15 @@ if __name__ == '__main__':
             print 'config should be: sw_name1 sw_name2 0/1 (0 for link down, 1 for link up)'
             continue
         if int(config[2]) == 0:
-            handle_link_down(config[0], config[1], topo, failing_edges, backup_paths, p4info_file_path, switches)
+            handle_link_down(config[0], config[1], topo, failing_edges,
+                             backup_configs, p4info_file_path, switches)
             print 'failing_edges: %s' % (str(failing_edges))
-            print 'backup_configs: %s' % (str(backup_paths))
+            print 'backup_configs: %s' % (str(backup_configs))
         else:
-            handle_link_up(config[0], config[1], topo, failing_edges, backup_paths)
+            handle_link_up(config[0], config[1], topo, failing_edges,
+                           backup_configs)
             print 'failing_edges: %s' % (str(failing_edges))
-            print 'backup_configs: %s' % (str(backup_paths))
-
+            print 'backup_configs: %s' % (str(backup_configs))
 
     #step 6: shut down connection with switch
     #I am not sure are these necessary?---by house

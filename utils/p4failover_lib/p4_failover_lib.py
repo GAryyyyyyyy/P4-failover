@@ -33,11 +33,11 @@ def _format_backup_path(backup_path):
         path[i-1] = int(edge_name[5:])
     return path
 
-def push_backup_paths_to_switches(p4info_file_path, switches, backup_paths):
+def push_backup_configs_to_switches(p4info_file_path, switches, backup_configs):
     p4info_helper = p4runtime_lib.helper.P4InfoHelper(p4info_file_path)
-    for backup_path in backup_paths:
-        switch_name, port, path = backup_path['switch'], backup_path['port'], backup_path['backup_path']
-        if len(backup_path) > 8:
+    for backup_config in backup_configs:
+        switch_name, port, path = backup_config['switch'], backup_config['port'], backup_config['backup_path']
+        if len(path) > 8:
             print("Back up path length cannot exceed 8")
             continue
         sw = switches[switch_name]
