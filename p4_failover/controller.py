@@ -80,12 +80,19 @@ def calculate_backup_paths(topo):
         backup_path_list.append({'switch':link[1],'port':topo.nodes[link[1]][topo[link[0]][link[1]]['name']],'backup_path':backup_path})
     return backup_path_list
 
-def handle_link_up(sw1, sw2, topo, failing_edges):
-    topo.add_edge(sw1, sw2, name=failing_edges.pop(sw1+sw2))
-    # may need to recalculate backup path for those who backup_path={}
+def recalculate_backup_path(topo, backup_configs):
+    for backup_config in backup_configs:
+        backup_path = backup_config['backup_path']
+        if len(backup_path) == 1:
+            src_sw, dst_sw = backup_path[0]
+            new_backup_path = dijkstra_backup(topo, src_sw, dst_sw)
+            if new_backup_path != None:
+                print 'Backup path for %s to %s has been recovered!' % (src_sw, dst_sw)
+                backup_config['backup_path'] = new_backup_path
 
-def dijkstra_backup_mock(a, b, c):
-    return [('','s1'), ('edge_0', 's2'), ('edge_1', 's3')]
+def handle_link_up(sw1, sw2, topo, failing_edges, backup_configs):
+    topo.add_edge(sw1, sw2, name=failing_edges.pop(sw1+sw2))
+    recalculate_backup_path(topo, backup_configs)
 
 def handle_link_down(sw1, sw2, topo, failing_edges, backup_configs, p4info_file_path, switches):
     down_edge_name = topo[sw1][sw2]["name"]
@@ -93,6 +100,8 @@ def handle_link_down(sw1, sw2, topo, failing_edges, backup_configs, p4info_file_
     topo.remove_edge(sw1, sw2)
     for backup_config in backup_configs:
         backup_path = backup_config['backup_path']
+        if len(backup_path) == 1:
+            continue # the port does not have a backup path yet
         src_sw = backup_path[0][1]
         dst_sw = backup_path[-1][1]
         for edge_name, sw_name in backup_path:
@@ -101,7 +110,7 @@ def handle_link_down(sw1, sw2, topo, failing_edges, backup_configs, p4info_file_
                 new_backup_path = dijkstra_backup(topo, src_sw, dst_sw)
                 if new_backup_path == None:
                     print 'Warnning! Cannot find backup path from %s to %s' % (src_sw, dst_sw)
-                    backup_config['backup_path'] = {}
+                    backup_config['backup_path'] = [(src_sw, dst_sw)]
                 else:
                     backup_config['backup_path'] = new_backup_path
                     update_backup_config(p4info_file_path, switches, backup_config)
@@ -110,7 +119,7 @@ def handle_link_down(sw1, sw2, topo, failing_edges, backup_configs, p4info_file_
 
 if __name__ == '__main__':
     #Step 1: construct topo using networkx
-    topo_file = "recalculate_topo/topology.json"
+    topo_file = "topo/topology.json"
     jsonTopo = JsonTopo(topo_file)
     topo = jsonTopo.get_networkx_topo()
 
@@ -122,10 +131,10 @@ if __name__ == '__main__':
     switches = {}
     p4info_file_path = './build/simple_recovery.p4.p4info.txt'
     bmv2_file_path = './build/simple_recovery.json'
-    switches['s1'] = setup_connection(p4info_file_path, bmv2_file_path, 's1', '127.0.0.1:50051', 0)
-    switches['s2'] = setup_connection(p4info_file_path, bmv2_file_path, 's2', '127.0.0.1:50052', 1)
-    switches['s3'] = setup_connection(p4info_file_path, bmv2_file_path, 's3', '127.0.0.1:50053', 2)
-    switches['s4'] = setup_connection(p4info_file_path, bmv2_file_path, 's4', '127.0.0.1:50054', 3)
+    # switches['s1'] = setup_connection(p4info_file_path, bmv2_file_path, 's1', '127.0.0.1:50051', 0)
+    # switches['s2'] = setup_connection(p4info_file_path, bmv2_file_path, 's2', '127.0.0.1:50052', 1)
+    # switches['s3'] = setup_connection(p4info_file_path, bmv2_file_path, 's3', '127.0.0.1:50053', 2)
+    # switches['s4'] = setup_connection(p4info_file_path, bmv2_file_path, 's4', '127.0.0.1:50054', 3)
     # switches['s5'] = setup_connection(p4info_file_path, bmv2_file_path, 's5', '127.0.0.1:50055', 4)
     # switches['s6'] = setup_connection(p4info_file_path, bmv2_file_path, 's6', '127.0.0.1:50056', 5)
     # switches['s7'] = setup_connection(p4info_file_path, bmv2_file_path, 's7', '127.0.0.1:50057', 6)
@@ -144,10 +153,10 @@ if __name__ == '__main__':
     # switches['s20'] = setup_connection(p4info_file_path, bmv2_file_path, 's20', '127.0.0.1:50070', 19)
 
     # #step 4: push backup paths to each switch
-    push_backup_paths_to_switches(p4info_file_path ,switches, backup_paths)
+    # push_backup_paths_to_switches(p4info_file_path ,switches, backup_paths)
     
     # #step 5: populate edge_to_port table
-    populate_edge_to_port_table(p4info_file_path, switches, topo)
+    # populate_edge_to_port_table(p4info_file_path, switches, topo)
 
     print 'Initial configuration complete...'
 
@@ -162,9 +171,11 @@ if __name__ == '__main__':
         if int(config[2]) == 0:
             handle_link_down(config[0], config[1], topo, failing_edges, backup_paths, p4info_file_path, switches)
             print 'failing_edges: %s' % (str(failing_edges))
+            print 'backup_configs: %s' % (str(backup_paths))
         else:
-            handle_link_up(config[0], config[1], topo, failing_edges)
+            handle_link_up(config[0], config[1], topo, failing_edges, backup_paths)
             print 'failing_edges: %s' % (str(failing_edges))
+            print 'backup_configs: %s' % (str(backup_paths))
 
 
     #step 6: shut down connection with switch
