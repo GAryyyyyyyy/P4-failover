@@ -62,6 +62,34 @@ def push_backup_paths_to_switches(p4info_file_path, switches, backup_paths):
         )
         sw.WriteTableEntry(table_entry)
 
+def update_backup_config(p4info_file_path, switches, backup_config):
+    p4info_helper = p4runtime_lib.helper.P4InfoHelper(p4info_file_path)
+    switch_name, port, path = backup_config['switch'], backup_config['port'], backup_config['backup_path']
+    if len(path) > 9:
+        print("Back up path length cannot exceed 8")
+        return
+    sw = switches[switch_name]
+    formated_path = _format_backup_path(path)
+    table_entry = p4info_helper.buildTableEntry(
+        table_name="MyIngress.port_backup_path",
+        match_fields={
+            "standard_metadata.egress_spec": (port)
+        },
+        action_name="MyIngress.copy_path",
+        action_params={
+            "length": len(path) - 1,
+            "v1": formated_path[0],
+            "v2": formated_path[1],
+            "v3": formated_path[2],
+            "v4": formated_path[3],
+            "v5": formated_path[4],
+            "v6": formated_path[5],
+            "v7": formated_path[6],
+            "v8": formated_path[7],
+        }
+    )
+    sw.ModifyTableEntry(table_entry)
+
 def setup_connection(p4info_file_path, bmv2_file_path, name, address, device_id):
     p4info_helper = p4runtime_lib.helper.P4InfoHelper(p4info_file_path)
     try:
