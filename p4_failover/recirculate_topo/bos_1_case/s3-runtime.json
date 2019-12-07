@@ -1,0 +1,17 @@
+{
+  "target": "bmv2",
+  "p4info": "build/simple_recovery.p4.p4info.txt",
+  "bmv2_json": "build/simple_recovery.json",
+  "table_entries": [
+    {
+      "table": "MyIngress.edge_to_port",
+      "match": {
+        "meta.out_edge": [4]
+      },
+      "action_name": "MyIngress.recovery_forward",
+      "action_params": {
+        "port": 2
+      }
+    }
+  ]
+}
