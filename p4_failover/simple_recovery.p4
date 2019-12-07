@@ -152,6 +152,7 @@ control MyIngress(inout headers hdr,
         }
         actions = {
             copy_path;
+            drop;
         }
     }
 
@@ -161,6 +162,7 @@ control MyIngress(inout headers hdr,
         }
         actions = {
             copy_path;
+            drop;
         }
     }
 
@@ -189,6 +191,7 @@ control MyIngress(inout headers hdr,
         }
         actions = {
             recovery_forward;
+            drop;
         }
     }
 
