@@ -163,19 +163,19 @@ control MyIngress(inout headers hdr,
         default_action = drop();
     }
  
-    // action update_mac_addr(macAddr_t dstAddr) {
-    //     hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-    //     hdr.ethernet.dstAddr = dstAddr;
-    // }
+    action update_mac_addr(macAddr_t dstAddr) {
+        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+        hdr.ethernet.dstAddr = dstAddr;
+    }
 
-    // table port_to_mac {
-    //     key = {
-    //         standard_metadata.egress_spec: exact;
-    //     }
-    //     actions = {
-    //         update_mac_addr;
-    //     }
-    // }
+    table port_to_mac {
+        key = {
+            standard_metadata.egress_spec: exact;
+        }
+        actions = {
+            update_mac_addr;
+        }
+    }
 
     action recovery_forward(egressSpec_t port) {
         standard_metadata.egress_spec = port;
@@ -569,7 +569,7 @@ control MyIngress(inout headers hdr,
         }
 
         //when we are ready to send pakcet out, we nned to update mac addr
-        //port_to_mac.apply();
+        port_to_mac.apply();
     }
 }
 
@@ -589,7 +589,23 @@ control MyEgress(inout headers hdr,
 *************************************************************************/
 
 control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
-    apply {  }
+    apply {  
+        update_checksum(
+	        hdr.ipv4.isValid(),
+            { hdr.ipv4.version,
+	          hdr.ipv4.ihl,
+              hdr.ipv4.diffserv,
+              hdr.ipv4.totalLen,
+              hdr.ipv4.identification,
+              hdr.ipv4.flags,
+              hdr.ipv4.fragOffset,
+              hdr.ipv4.ttl,
+              hdr.ipv4.protocol,
+              hdr.ipv4.srcAddr,
+              hdr.ipv4.dstAddr },
+            hdr.ipv4.hdrChecksum,
+            HashAlgorithm.csum16);
+    }
 }
 
 /*************************************************************************
