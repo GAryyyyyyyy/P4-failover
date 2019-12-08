@@ -115,10 +115,6 @@ control MyIngress(inout headers hdr,
 
     action try_ipv4_forward(egressSpec_t port) {
         standard_metadata.egress_spec = port;
-        //更新逻辑应该放到update_mac_addr里统一做
-        // hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-        // hdr.ethernet.dstAddr = dstAddr;
-        // hdr.ipv4.ttl = hdr.ipv4.ttl - 1; //不应该在这更新ttl
         all_ports_status.read(meta.out_port_status, (bit<32>)standard_metadata.egress_spec);
     }
 
@@ -129,7 +125,6 @@ control MyIngress(inout headers hdr,
         actions = {
             try_ipv4_forward;
             drop;
-            NoAction;
         }
         size = 1024;
         default_action = drop();
@@ -154,6 +149,7 @@ control MyIngress(inout headers hdr,
             copy_path;
             drop;
         }
+        default_action = drop();
     }
 
     table port_backup_path_fault {
@@ -164,12 +160,13 @@ control MyIngress(inout headers hdr,
             copy_path;
             drop;
         }
+        default_action = drop();
     }
-
-    action update_mac_addr(macAddr_t dstAddr) {
-        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-        hdr.ethernet.dstAddr = dstAddr;
-    }
+ 
+    // action update_mac_addr(macAddr_t dstAddr) {
+    //     hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+    //     hdr.ethernet.dstAddr = dstAddr;
+    // }
 
     // table port_to_mac {
     //     key = {
@@ -193,6 +190,7 @@ control MyIngress(inout headers hdr,
             recovery_forward;
             drop;
         }
+        default_action = drop();
     }
 
     action recoveryPath_finish() {
@@ -565,10 +563,13 @@ control MyIngress(inout headers hdr,
         //if we are doing failover, do we need to decrease ttl?
         if(hdr.ipv4.isValid()){
             update_ttl();
+            if(hdr.ipv4.ttl == 0) {
+                drop();
+            }
         }
 
-        //comment for test
-        //port_to_mac.apply();//update mac
+        //when we are ready to send pakcet out, we nned to update mac addr
+        //port_to_mac.apply();
     }
 }
 

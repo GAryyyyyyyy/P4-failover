@@ -25,7 +25,6 @@ import p4runtime_lib.helper
 #         bmv2_config = backup_path_to_bmv2_config(topo, path)
 #         bmv2_configs.append(bmv2_config)
 #     return bmv2_configs
-
 def _format_backup_path(backup_path):
     path = [0, 0, 0, 0, 0, 0, 0, 0]
     for i in range(1, len(backup_path)):
@@ -42,8 +41,30 @@ def push_backup_configs_to_switches(p4info_file_path, switches, backup_configs):
             continue
         sw = switches[switch_name]
         formated_path = _format_backup_path(path)
+        # for table port_backup_path
         table_entry = p4info_helper.buildTableEntry(
             table_name="MyIngress.port_backup_path",
+            match_fields={
+                "standard_metadata.egress_spec": (port)
+            },
+            action_name="MyIngress.copy_path",
+            action_params={
+                "length": len(path) - 1,
+                "v1": formated_path[0],
+                "v2": formated_path[1],
+                "v3": formated_path[2],
+                "v4": formated_path[3],
+                "v5": formated_path[4],
+                "v6": formated_path[5],
+                "v7": formated_path[6],
+                "v8": formated_path[7],
+            }
+        )
+        sw.WriteTableEntry(table_entry)
+
+        # for table port_backup_path_fault
+        table_entry = p4info_helper.buildTableEntry(
+            table_name="MyIngress.port_backup_path_fault",
             match_fields={
                 "standard_metadata.egress_spec": (port)
             },

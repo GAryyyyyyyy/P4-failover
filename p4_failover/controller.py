@@ -154,9 +154,9 @@ if __name__ == '__main__':
     switches = {}
     p4info_file_path = './build/simple_recovery.p4.p4info.txt'
     bmv2_file_path = './build/simple_recovery.json'
-    # switches['s1'] = setup_connection(p4info_file_path, bmv2_file_path, 's1', '127.0.0.1:50051', 0)
-    # switches['s2'] = setup_connection(p4info_file_path, bmv2_file_path, 's2', '127.0.0.1:50052', 1)
-    # switches['s3'] = setup_connection(p4info_file_path, bmv2_file_path, 's3', '127.0.0.1:50053', 2)
+    switches['s1'] = setup_connection(p4info_file_path, bmv2_file_path, 's1', '127.0.0.1:50051', 0)
+    switches['s2'] = setup_connection(p4info_file_path, bmv2_file_path, 's2', '127.0.0.1:50052', 1)
+    switches['s3'] = setup_connection(p4info_file_path, bmv2_file_path, 's3', '127.0.0.1:50053', 2)
     # switches['s4'] = setup_connection(p4info_file_path, bmv2_file_path, 's4', '127.0.0.1:50054', 3)
     # switches['s5'] = setup_connection(p4info_file_path, bmv2_file_path, 's5', '127.0.0.1:50055', 4)
     # switches['s6'] = setup_connection(p4info_file_path, bmv2_file_path, 's6', '127.0.0.1:50056', 5)
@@ -179,7 +179,7 @@ if __name__ == '__main__':
     push_backup_configs_to_switches(p4info_file_path ,switches, backup_configs)
 
     # #step 5: populate edge_to_port table
-    # populate_edge_to_port_table(p4info_file_path, switches, topo)
+    populate_edge_to_port_table(p4info_file_path, switches, topo)
 
     print 'Initial configuration complete...'
 
