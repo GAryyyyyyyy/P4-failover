@@ -95,12 +95,7 @@ class ExerciseTopo(Topo):
         for link in host_links:
             host_name = link['node1']
             sw_name, sw_port = self.parse_switch_node(link['node2'])
-            host_ip = hosts[host_name]['ip']
-            host_mac = hosts[host_name]['mac']
-            host_dimage = hosts[host_name]['dimage']
-            host_network_mode = hosts[host_name]['network_mode']
-            host_volumes = hosts[host_name]['volumes'].split(',')
-            self.addHost(host_name, ip=host_ip, mac=host_mac, dimage=host_dimage, network_mode=host_network_mode, volumes=[host_volumes[0]+":"+host_volumes[1]])
+            self.addHost(host_name, **hosts[host_name])
             self.addLink(host_name, sw_name,
                          delay=link['latency'], bw=link['bandwidth'],
                          port2=sw_port)
