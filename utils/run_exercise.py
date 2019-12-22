@@ -28,7 +28,6 @@ from mininet.net import Mininet
 from mininet.topo import Topo
 from mininet.link import TCLink
 from mininet.cli import CLI
-from mininet.node import Docker
 
 from p4runtime_switch import P4RuntimeSwitch
 import p4runtime_lib.simple_controller
@@ -95,7 +94,9 @@ class ExerciseTopo(Topo):
         for link in host_links:
             host_name = link['node1']
             sw_name, sw_port = self.parse_switch_node(link['node2'])
-            self.addHost(host_name, **hosts[host_name])
+            host_ip = hosts[host_name]['ip']
+            host_mac = hosts[host_name]['mac']
+            self.addHost(host_name, ip=host_ip, mac=host_mac)
             self.addLink(host_name, sw_name,
                          delay=link['latency'], bw=link['bandwidth'],
                          port2=sw_port)
@@ -252,8 +253,7 @@ class ExerciseRunner:
 
         self.net = Mininet(topo = self.topo,
                       link = TCLink,
-                      #host = P4Host,
-                      host = Docker,
+                      host = P4Host,
                       switch = defaultSwitchClass,
                       controller = None)
 
@@ -322,8 +322,8 @@ class ExerciseRunner:
         """
         for s in self.net.switches:
             s.describe()
-        #for h in self.net.hosts:
-         #   h.describe()
+        for h in self.net.hosts:
+            h.describe()
         self.logger("Starting mininet CLI")
         # Generate a message that will be printed by the Mininet CLI to make
         # interacting with the simple switch a little easier.
