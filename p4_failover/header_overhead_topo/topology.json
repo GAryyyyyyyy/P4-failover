@@ -1,0 +1,24 @@
+{
+    "hosts": {
+        "h1": {"ip": "10.0.1.1/24", "mac": "08:00:00:00:01:11",
+               "commands":["route add default gw 10.0.1.10 dev eth0",
+                           "arp -i eth0 -s 10.0.1.10 08:00:00:00:01:00"]},
+        "h2": {"ip": "10.0.2.2/24", "mac": "08:00:00:00:02:22",
+               "commands":["route add default gw 10.0.2.20 dev eth0",
+                           "arp -i eth0 -s 10.0.2.20 08:00:00:00:02:00"]}
+    },
+    "switches": {
+        "s1": { "runtime_json" : "header_overhead_topo/s1-runtime.json" },
+        "s2": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s3": { "runtime_json" : "header_overhead_topo/s3-runtime.json" },
+        "s4": { "runtime_json" : "header_overhead_topo/s4-runtime.json" },
+        "s5": { "runtime_json" : "header_overhead_topo/s5-runtime.json" },
+        "s6": { "runtime_json" : "header_overhead_topo/s6-runtime.json" }
+    },
+    "links": [
+        ["h1", "s1-p1"], ["h2", "s4-p1"], 
+        ["s1-p2", "s2-p1"], ["s1-p3", "s3-p1"],
+        ["s4-p2", "s5-p2"], ["s4-p3", "s6-p2"],
+        ["s2-p2", "s5-p1"], ["s3-p2", "s6-p1"]
+    ]
+}

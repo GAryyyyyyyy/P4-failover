@@ -1,0 +1,47 @@
+{
+  "target": "bmv2",
+  "p4info": "build/simple_recovery.p4.p4info.txt",
+  "bmv2_json": "build/simple_recovery.json",
+  "table_entries": [
+    {
+      "table": "MyIngress.edge_to_port",
+      "match": {
+        "meta.out_edge": [1]
+      },
+      "action_name": "MyIngress.recovery_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.edge_to_port",
+      "match": {
+        "meta.out_edge": [2]
+      },
+      "action_name": "MyIngress.recovery_forward",
+      "action_params": {
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.port_to_mac",
+      "match": {
+        "standard_metadata.egress_spec": [1]
+      },
+      "action_name": "MyIngress.update_mac_addr",
+      "action_params": {
+        "dstAddr": "08:00:00:00:01:00"
+      }
+    },
+    {
+      "table": "MyIngress.port_to_mac",
+      "match": {
+        "standard_metadata.egress_spec": [2]
+      },
+      "action_name": "MyIngress.update_mac_addr",
+      "action_params": {
+        "dstAddr": "08:00:00:00:02:00"
+      }
+    }
+  ]
+}
