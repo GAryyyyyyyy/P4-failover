@@ -4,21 +4,21 @@
   "bmv2_json": "build/simple_recovery.json",
   "table_entries": [
     {
-      "table": "MyIngress.ipv4_lpm",
+      "table": "MyIngress.edge_to_port",
       "match": {
-        "hdr.ipv4.dstAddr": ["10.0.1.1", 32]
+        "meta.out_edge": [5]
       },
-      "action_name": "MyIngress.try_ipv4_forward",
+      "action_name": "MyIngress.recovery_forward",
       "action_params": {
         "port": 1
       }
     },
     {
-      "table": "MyIngress.ipv4_lpm",
+      "table": "MyIngress.edge_to_port",
       "match": {
-        "hdr.ipv4.dstAddr": ["10.0.2.2", 32]
+        "meta.out_edge": [6]
       },
-      "action_name": "MyIngress.try_ipv4_forward",
+      "action_name": "MyIngress.recovery_forward",
       "action_params": {
         "port": 2
       }

@@ -1,0 +1,139 @@
+以下结果利用ping得到，并去除了部分异常点（就是延迟超级大的）。
+
+2-hop:
+    "links": [
+        ["h1", "s1-p1"], ["h2", "s4-p1"], 
+        ["s1-p2", "s2-p1"], ["s1-p3", "s3-p1"],
+        ["s4-p2", "s2-p2"], ["s4-p3", "s3-p2"]
+    ]
+    normal ttl(ms):
+        13.7 13.9 13.6 13.6 13.9 13.6 13.6 13.7 13.4 13.4
+    frr ttl(ms):
+        18.5 18.4 18.6 18.4 18.7 18.9 18.8 18.1 18.2 18.5
+
+3-hop:
+    "links": [
+        ["h1", "s1-p1"], ["h2", "s4-p1"], 
+        ["s1-p2", "s2-p1"], ["s1-p3", "s3-p1"],
+        ["s4-p2", "s5-p2"], ["s4-p3", "s6-p2"],
+        ["s2-p2", "s5-p1"], ["s3-p2", "s6-p1"]
+    ]
+    normal ttl(ms):
+        17.6 17.5 17.8 17.5 17.9 17.7 17.6 17.7 18.0 17.5
+    frr ttl(ms):
+        23.8 23.9 24.2 24.5 24.1 24.0 23.7 23.9 23.8 24.7
+
+4-hop:
+    "switches": {
+        "s1": { "runtime_json" : "header_overhead_topo/s1-runtime.json" },
+        "s2": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s3": { "runtime_json" : "header_overhead_topo/s3-runtime.json" },
+        "s4": { "runtime_json" : "header_overhead_topo/s4-runtime.json" },
+        "s5": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s6": { "runtime_json" : "header_overhead_topo/s6-runtime.json" },
+        "s7": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s8": { "runtime_json" : "header_overhead_topo/s8-runtime.json" }
+    },
+    "links": [
+        ["h1", "s1-p1"], ["h2", "s4-p1"], 
+        ["s1-p2", "s2-p1"], ["s1-p3", "s3-p1"],
+        ["s4-p2", "s7-p2"], ["s4-p3", "s8-p2"],
+        ["s2-p2", "s5-p1"], ["s5-p2", "s7-p1"],
+        ["s3-p2", "s6-p1"], ["s6-p2", "s8-p1"]
+    ]
+    normal ttl(ms):
+        22.8 23.3 22.6 22.7 22.0 22.5 22.6 22.0 22.4 22.0
+    frr ttl(ms):
+        30.7 30.3 30.5 30.2 30.4 30.5 30.0 30.2 30.3 30.2
+
+5-hop:
+    "switches": {
+        "s1": { "runtime_json" : "header_overhead_topo/s1-runtime.json" },
+        "s2": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s3": { "runtime_json" : "header_overhead_topo/s3-runtime.json" },
+        "s4": { "runtime_json" : "header_overhead_topo/s4-runtime.json" },
+        "s5": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s6": { "runtime_json" : "header_overhead_topo/s6-runtime.json" },
+        "s7": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s8": { "runtime_json" : "header_overhead_topo/s8-runtime.json" },
+        "s9": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s10": { "runtime_json" : "header_overhead_topo/s10-runtime.json" }
+    },
+    "links": [
+        ["h1", "s1-p1"], ["h2", "s4-p1"], 
+        ["s1-p2", "s2-p1"], ["s1-p3", "s3-p1"],
+        ["s4-p2", "s9-p2"], ["s4-p3", "s10-p2"],
+        ["s2-p2", "s5-p1"], ["s5-p2", "s7-p1"],
+        ["s3-p2", "s6-p1"], ["s6-p2", "s8-p1"],
+        ["s7-p2", "s9-p1"], ["s8-p2", "s10-p1"]
+    ]
+    normal ttl(ms):
+        25.5 24.6 25.5 25.9 25.5 25.1 24.6 24.1 24.9 24.4
+    frr ttl(ms):
+        34.3 34.4 34.5 34.1 34.3 34.0 33.8 33.7 34.0 34.0
+
+6-hop:
+    "switches": {
+        "s1": { "runtime_json" : "header_overhead_topo/s1-runtime.json" },
+        "s2": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s3": { "runtime_json" : "header_overhead_topo/s3-runtime.json" },
+        "s4": { "runtime_json" : "header_overhead_topo/s4-runtime.json" },
+        "s5": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s6": { "runtime_json" : "header_overhead_topo/s6-runtime.json" },
+        "s7": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s8": { "runtime_json" : "header_overhead_topo/s8-runtime.json" },
+        "s9": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s10": { "runtime_json" : "header_overhead_topo/s10-runtime.json" },
+        "s11": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s12": { "runtime_json" : "header_overhead_topo/s12-runtime.json" }
+    },
+    "links": [
+        ["h1", "s1-p1"], ["h2", "s4-p1"], 
+        ["s1-p2", "s2-p1"], ["s1-p3", "s3-p1"],
+        ["s4-p2", "s11-p2"], ["s4-p3", "s12-p2"],
+        ["s2-p2", "s5-p1"], ["s5-p2", "s7-p1"],
+        ["s3-p2", "s6-p1"], ["s6-p2", "s8-p1"],
+        ["s7-p2", "s9-p1"], ["s8-p2", "s10-p1"],
+        ["s9-p2", "s11-p1"], ["s10-p2", "s12-p1"]
+    ]
+    normal ttl(ms):
+        29.3 29.7 29.5 29.9 29.2 29.3 29.0 29.0 30.0 29.6
+    frr ttl(ms):
+        41.2 41.1 40.8 41.7 41.4 40.9 40.3 40.1 39.9 40.2
+
+7-hop:
+    "switches": {
+        "s1": { "runtime_json" : "header_overhead_topo/s1-runtime.json" },
+        "s2": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s3": { "runtime_json" : "header_overhead_topo/s3-runtime.json" },
+        "s4": { "runtime_json" : "header_overhead_topo/s4-runtime.json" },
+        "s5": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s6": { "runtime_json" : "header_overhead_topo/s6-runtime.json" },
+        "s7": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s8": { "runtime_json" : "header_overhead_topo/s8-runtime.json" },
+        "s9": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s10": { "runtime_json" : "header_overhead_topo/s10-runtime.json" },
+        "s11": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s12": { "runtime_json" : "header_overhead_topo/s12-runtime.json" },
+        "s13": { "runtime_json" : "header_overhead_topo/s2-runtime.json" },
+        "s14": { "runtime_json" : "header_overhead_topo/s14-runtime.json" }
+
+    },
+    "links": [
+        ["h1", "s1-p1"], ["h2", "s4-p1"], 
+        ["s1-p2", "s2-p1"], ["s1-p3", "s3-p1"],
+        ["s4-p2", "s13-p2"], ["s4-p3", "s14-p2"],
+        ["s2-p2", "s5-p1"], ["s5-p2", "s7-p1"],
+        ["s3-p2", "s6-p1"], ["s6-p2", "s8-p1"],
+        ["s7-p2", "s9-p1"], ["s8-p2", "s10-p1"],
+        ["s9-p2", "s11-p1"], ["s10-p2", "s12-p1"],
+        ["s11-p2", "s13-p1"], ["s12-p2", "s14-p1"]
+    ]
+    normal ttl(ms):
+        37.1 36.9 37.4 36.6 37.5 36.7 36.6 36.3 36.2 35.9
+    frr ttl(ms):
+        52.1 52.1 52.1 52.4 50.9 51.1 50.9 51.2 50.7 50.8
+
+
+
+
