@@ -41,18 +41,6 @@ def eval_avg_recovery_len(topo):
 
     avg_len = total_len / len(topo.edges)
     print avg_len
-    # failed_edges = []
-    # # print topo.edges
-    # while True:
-    #     for edge in topo.edges:
-    #         if random.random() <= 0.05:
-    #             print edge
-    #             failed_edges.append(edge)
-    #             _edge_fail(topo, edge)
-    #     topo.remove_edges_from(failed_edges)
-    #     print len(topo.edges)
-    #     time.sleep(20)
-
 
 if __name__ == '__main__':
     topo = eval_topo.vl2_topo(16)
