@@ -1,4 +1,65 @@
 # -*- coding: utf-8 -*-
+
+# Step 1 code
+def path_analysis(path, path_set):
+    disjoint = True
+    path_sw = path[0]
+    path_port = path[1]
+    converge_p = None
+    for p in path_set:
+        p_sw = p[0]
+        p_port = p[1]
+        for i in range(0, len(path_sw)):
+            if path_sw[i] in p_sw:
+                disjoint = False
+                if i == len(path_port):
+                    break # 如果path中的最后一个元素出现在p中，就没啥好判断的了，去看其他的p就行了
+                j = p_sw.index(path_sw[i])
+                if j != len(p_port) and path_port[i] != p_port[j]:
+                    return 0 # 端口不一样，不行！ 
+                # i j 是第一个相同元素出现的地方，从i+1 j+1 开始往后比较看看什么情况
+                i += 1
+                j += 1
+                while i<len(path_sw):
+                    if j<len(p_sw):
+                        if path_sw[i] == p_sw[j]:
+                            if i == len(path_port) or j == len(p_port) or path_port[i] == p_port[j]: # 如果已经到了最后一个交换机了，端口是不需要判断的！
+                                i += 1
+                                j += 1
+                                continue
+                            else:
+                                return 0 # 交换机一样但出口不一样，不行！
+                        else:
+                            return 0 # 交换机不一样，不行！
+                    else:
+                        if path_sw[i] in p_sw:
+                            return 0 # p已经走到底了，path唯一的可能就是往后面接上，但如果path后面的交换机在p中曾经出现过，那就是不合法的！这样就绕回去了。
+                        i += 1
+
+
+    if disjoint:
+        return 2
+    return 1
+    
+def path_aggragation(paths):
+    path_sets = []
+    for path in paths:
+        is_path_aggregated = False
+        for existing_path_set in path_sets:
+            result = path_analysis(path, existing_path_set)
+            if result > 0: # convergent or disjoint
+                is_path_aggregated = True
+                existing_path_set.append(path)
+                break
+        if not is_path_aggregated:
+            path_sets.append([path]) # 如果path不是上面的两种情况，那他就成为了一个新的path set
+
+    print 'path sets', path_sets
+    return path_sets
+
+
+
+# Step 2 code
 def per_switch_ID_assign(matrix):
     for row in matrix:
         index = 1
@@ -65,6 +126,7 @@ def inconsistency_free_ID_adjust(matrix):
                     if matrix[j][k][1] == final_id:
                         matrix[j][i][1], matrix[j][k][1] = matrix[j][k][1], matrix[j][i][1]
 
+# result calculate code
 def count_AIB(matrix):
     result = []
     for row in matrix:
@@ -87,13 +149,23 @@ def count_AIB(matrix):
 
 
 if __name__ == '__main__':
-    matrix = [
-                [[1, 0], [1, 0], [1, 0], [2, 0], [1, 0], [2, 0]],
-                [[2, 0], [1, 0], [1, 0], [2, 0], [3, 0], [4, 0]],
-                [[1, 0], [2, 0], [2, 0], [2, 0], [3, 0], [2, 0]]
-             ]
-    per_switch_ID_assign(matrix)
-    print matrix
-    inconsistency_free_ID_adjust(matrix)
-    print matrix
-    count_AIB(matrix)
+    paths = [
+        [ [1, 2, 3, 4], [1, 1, 1] ],
+        [ [4, 3, 2, 1], [1, 1, 1] ],
+        [ [6, 4, 5], [1, 1] ]
+    ]
+    path_aggragation(paths)
+    # matrix = [
+    #             [[1, 0], [1, 0], [1, 0], [2, 0], [1, 0], [2, 0]],
+    #             [[2, 0], [1, 0], [1, 0], [2, 0], [3, 0], [4, 0]],
+    #             [[1, 0], [2, 0], [2, 0], [2, 0], [3, 0], [2, 0]],
+    #             [[1, 0], [2, 0], [2, 0], [2, 0], [3, 0], [2, 0]],
+    #             [[1, 0], [2, 0], [2, 0], [2, 0], [3, 0], [2, 0]],
+    #             [[1, 0], [2, 0], [2, 0], [2, 0], [3, 0], [2, 0]],
+    #             [[1, 0], [2, 0], [2, 0], [2, 0], [3, 0], [2, 0]]
+    #          ]
+    # per_switch_ID_assign(matrix)
+    # print matrix
+    # inconsistency_free_ID_adjust(matrix)
+    # print matrix
+    # count_AIB(matrix)
