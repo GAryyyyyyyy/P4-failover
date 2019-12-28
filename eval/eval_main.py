@@ -32,7 +32,7 @@ def eval_avg_recovery_len(topo):
     
     # print total_len
     avg_len = total_len / len(topo.edges)
-    print avg_len
+    print 'Optimal avg recovery len overhead:', avg_len
 
     total_len = 0
     for edge in topo.edges:
@@ -43,9 +43,10 @@ def eval_avg_recovery_len(topo):
         total_len += (len_failed - len_normal)
 
     avg_len = total_len / len(topo.edges)
-    print avg_len
+    print 'Our solution avg recovery len overhead:', avg_len
 
-def path2XPath_path(topo, path):
+
+def _path2XPath_path(topo, path):
     port = []
     for i in range(len(path)-1):
         port.append(topo.nodes[path[i]][path[i+1]])
@@ -70,7 +71,7 @@ def eval_memory_overhead(topo):
     paths_XPath = []
     for path in paths_failover:
         entry_sum += len(path) - 1
-        paths_XPath.append(path2XPath_path(topo, path))
+        paths_XPath.append(_path2XPath_path(topo, path))
 
     print 'Naive 1:1 avg memory overhead:', float(entry_sum) / len(topo.nodes)
     # for h in paths_XPath:
@@ -85,6 +86,7 @@ def eval_memory_overhead(topo):
     print 'Our solution memory overhead:', float(port_sum) / len(topo.nodes)
 
 if __name__ == '__main__':
-    print 'Topo: AB-fat-tree(8).'
-    topo = eval_topo.AB_fat_tree_topo(8)
+    # print 'Topo: AB-fat-tree(8).'
+    topo = eval_topo.fat_tree_topo(16)
     eval_memory_overhead(topo)
+    eval_avg_recovery_len(topo)

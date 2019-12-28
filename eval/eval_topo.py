@@ -65,6 +65,9 @@ def vl2_topo(port_num_of_aggregation_switch=4):
         for j in range(num_of_intermediate_switches):
             topo.add_edge("Aggregation switch {}".format(i),
                           "Intermediate switch {}".format(j))
+            topo.nodes["Aggregation switch {}".format(i)]["Intermediate switch {}".format(j)] = len(topo.nodes["Aggregation switch {}".format(i)]) + 1
+            topo.nodes["Intermediate switch {}".format(j)]["Aggregation switch {}".format(i)] = len(topo.nodes["Intermediate switch {}".format(j)]) + 1
+
 
     # create ToR switch
     num_of_tor_switches_per_aggregation_switch_can_connect = num_of_aggregation_switches // 2
@@ -75,10 +78,15 @@ def vl2_topo(port_num_of_aggregation_switch=4):
             i // num_of_tor_switches_per_aggregation_switch_can_connect) * 2
         topo.add_edge("ToR switch {}".format(i),
                       "Aggregation switch {}".format(aggregation_index))
+        topo.nodes["ToR switch {}".format(i)]["Aggregation switch {}".format(aggregation_index)] = len(topo.nodes["ToR switch {}".format(i)]) + 1
+        topo.nodes["Aggregation switch {}".format(aggregation_index)]["ToR switch {}".format(i)] = len(topo.nodes["Aggregation switch {}".format(aggregation_index)]) + 1
+
         aggregation_index += 1  # The second aggregation switch
         topo.add_edge("ToR switch {}".format(i),
                       "Aggregation switch {}".format(aggregation_index))
-        
+        topo.nodes["ToR switch {}".format(i)]["Aggregation switch {}".format(aggregation_index)] = len(topo.nodes["ToR switch {}".format(i)]) + 1
+        topo.nodes["Aggregation switch {}".format(aggregation_index)]["ToR switch {}".format(i)] = len(topo.nodes["Aggregation switch {}".format(aggregation_index)]) + 1
+
     topo.name = 'VL2'
 
     return topo
