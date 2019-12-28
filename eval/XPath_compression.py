@@ -54,7 +54,7 @@ def path_aggragation(paths):
         if not is_path_aggregated:
             path_sets.append([path]) # 如果path不是上面的两种情况，那他就成为了一个新的path set
 
-    print 'path sets', path_sets
+    # print 'path sets', path_sets
     return path_sets
 
 
@@ -115,14 +115,14 @@ def inconsistency_free_ID_adjust(matrix):
         final_id = 0
         min_AIB = 999999999
         for aval_id in aval_ids: #尝试每一种可能的方式，要找到AIB最小的那种
-            print 'aval_id:', aval_id
+            # print 'aval_id:', aval_id
             max_AIB = 0
             for j in range(0, len(matrix)): #对每个id，也是要一行一行的看，找到所有需要调整的行，然后调整他，计算一下AIB，对所有调整过的行，最大的AIB就是这个aval_id的AIB
                 if matrix[j][i][0] != 0 and matrix[j][i][1] != aval_id:
                     cur_AIB = 1
                     for k in range(i+1, len(matrix[j])):
                         if matrix[j][k][1] == aval_id:
-                            print j,k
+                            # print j,k
                             matrix[j][i][1], matrix[j][k][1] = matrix[j][k][1], matrix[j][i][1] #进行更换
                             temp = sorted(matrix[j], key = lambda x: x[1]) #这里进行排序是为了让id连续，从而可以根据端口的变化来判定AIB是否增加，id连续了，只要端口变化，AIB就要++
                             start_index = 0
@@ -143,7 +143,7 @@ def inconsistency_free_ID_adjust(matrix):
             if max_AIB <= min_AIB:
                 min_AIB = max_AIB
                 final_id = aval_id
-        print 'final_id', final_id
+        # print 'final_id', final_id
         for j in range(0, len(matrix)): #找到了真正AIB最小的那个后，实际进行一次调整，就完成了对第i行的调整了。
             if matrix[j][i][0] != 0 and matrix[j][i][1] != final_id:
                 for k in range(i+1, len(matrix[j])):
@@ -170,8 +170,20 @@ def count_AIB(matrix):
                 cur_AIB += 1
                 pre_port = temp[m][0]
         result.append(cur_AIB)
-    print 'result:', result
+    print 'XPath compression result:', result
+    return result
 
+
+def XPath_compression(paths):
+    path_sets = path_aggragation(paths)
+    matrix = path_sets2matrix(path_sets)
+    per_switch_ID_assign(matrix)
+    inconsistency_free_ID_adjust(matrix)
+    result = count_AIB(matrix)
+    sum_AIB = 0
+    for i in result:
+        sum_AIB += i
+    return float(sum_AIB) / len(result)
 
 
 if __name__ == '__main__':

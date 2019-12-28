@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import networkx as nx
 
 def fat_tree_topo(n=4):
@@ -23,6 +22,10 @@ def fat_tree_topo(n=4):
             for k in range(num_of_edge_switches):
                 topo.add_edge("Pod {} aggregation switch {}".format(i, j),
                               "Pod {} edge switch {}".format(i, k))
+                # print topo.nodes["Pod {} aggregation switch {}".format(i, j)]
+                topo.nodes["Pod {} aggregation switch {}".format(i, j)]["Pod {} edge switch {}".format(i, k)] = len(topo.nodes["Pod {} aggregation switch {}".format(i, j)]) + 1
+                topo.nodes["Pod {} edge switch {}".format(i, k)]["Pod {} aggregation switch {}".format(i, j)] = len(topo.nodes["Pod {} edge switch {}".format(i, k)]) + 1
+                # print topo.nodes["Pod {} aggregation switch {}".format(i, j)]
 
     # add edge among core and aggregation switch
     num_of_core_switches_connected_to_same_aggregation_switch = num_of_core_switches // num_of_aggregation_switches
@@ -34,6 +37,8 @@ def fat_tree_topo(n=4):
                 "Core switch {}".format(i),
                 "Pod {} aggregation switch {}".format(
                     j, aggregation_switch_index_in_pod))
+            topo.nodes["Core switch {}".format(i)]["Pod {} aggregation switch {}".format(j, aggregation_switch_index_in_pod)] = len(topo.nodes["Core switch {}".format(i)]) + 1
+            topo.nodes["Pod {} aggregation switch {}".format(j, aggregation_switch_index_in_pod)]["Core switch {}".format(i)] = len(topo.nodes["Pod {} aggregation switch {}".format(j, aggregation_switch_index_in_pod)]) + 1
 
     topo.name = 'fat-tree'
 
@@ -77,3 +82,5 @@ def vl2_topo(port_num_of_aggregation_switch=4):
     return topo
 
 
+if __name__ == '__main__':
+    topo = fat_tree_topo()
