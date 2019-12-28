@@ -58,6 +58,30 @@ def path_aggragation(paths):
     return path_sets
 
 
+#将第一步的结果转换为第二步的输入
+def dict2list(matrix):
+    l = []
+    for value in matrix.itervalues():
+        l.append(value)
+    return l
+
+def path_sets2matrix(path_sets):
+    matrix = {}
+    for index in range(len(path_sets)):
+        for path in path_sets[index]:
+            path_sw = path[0]
+            path_port = path[1]
+            for i in range(0,len(path_port)):
+                if matrix.get(path_sw[i]) == None:
+                    matrix[path_sw[i]] = [[0,0] for m in range(len(path_sets))]
+                matrix.get(path_sw[i])[index][0] = path_port[i]
+            if matrix.get(path_sw[-1]) == None:
+                matrix[path_sw[-1]] = [[0,0] for n in range(len(path_sets))]
+    matrix = dict2list(matrix)
+    # print matrix
+    return matrix
+
+
 
 # Step 2 code
 def per_switch_ID_assign(matrix):
@@ -137,7 +161,9 @@ def count_AIB(matrix):
             if(temp[start_index][1]!=0):
                 break
             start_index += 1
-
+        if start_index >= len(temp): # 这一行全是0的话就不用考虑了，直接跳过。
+            result.append(0)
+            continue
         pre_port = temp[start_index][0]
         for m in range(start_index+1, len(temp)):
             if temp[m][0] != pre_port:
@@ -154,7 +180,9 @@ if __name__ == '__main__':
         [ [4, 3, 2, 1], [1, 1, 1] ],
         [ [6, 4, 5], [1, 1] ]
     ]
-    path_aggragation(paths)
+    path_sets = path_aggragation(paths)
+    matrix = path_sets2matrix(path_sets)
+    print 'step 2 input matrix', matrix
     # matrix = [
     #             [[1, 0], [1, 0], [1, 0], [2, 0], [1, 0], [2, 0]],
     #             [[2, 0], [1, 0], [1, 0], [2, 0], [3, 0], [4, 0]],
@@ -164,8 +192,8 @@ if __name__ == '__main__':
     #             [[1, 0], [2, 0], [2, 0], [2, 0], [3, 0], [2, 0]],
     #             [[1, 0], [2, 0], [2, 0], [2, 0], [3, 0], [2, 0]]
     #          ]
-    # per_switch_ID_assign(matrix)
-    # print matrix
-    # inconsistency_free_ID_adjust(matrix)
-    # print matrix
-    # count_AIB(matrix)
+    per_switch_ID_assign(matrix)
+    print 'step 2.1 output', matrix
+    inconsistency_free_ID_adjust(matrix)
+    print 'step 2.2 output', matrix
+    count_AIB(matrix)
