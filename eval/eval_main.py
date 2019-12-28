@@ -85,6 +85,6 @@ def eval_memory_overhead(topo):
     print 'Our solution memory overhead:', float(port_sum) / len(topo.nodes)
 
 if __name__ == '__main__':
-    print 'Topo: fat-tree(4).'
-    topo = eval_topo.fat_tree_topo()
+    print 'Topo: AB-fat-tree(8).'
+    topo = eval_topo.AB_fat_tree_topo(8)
     eval_memory_overhead(topo)

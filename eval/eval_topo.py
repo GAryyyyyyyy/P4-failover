@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import networkx as nx
 
 def fat_tree_topo(n=4):
@@ -81,6 +83,64 @@ def vl2_topo(port_num_of_aggregation_switch=4):
 
     return topo
 
+
+
+def AB_fat_tree_topo(n=4):
+    """Standard fat tree topology
+    n: number of pods
+    total n^3/4 servers
+    """
+    topo = nx.Graph()
+    num_of_edge_switches = n // 2
+    num_of_aggregation_switches = num_of_edge_switches
+    num_of_core_switches = int((n / 2) * (n / 2))
+
+    # generate topo pod by pod
+    for i in range(n):
+        for j in range(num_of_edge_switches):
+            topo.add_node("Pod {} edge switch {}".format(i, j))
+            topo.add_node("Pod {} aggregation switch {}".format(i, j))
+
+    # add edge among edge and aggregation switch within pod
+    for i in range(n):
+        for j in range(num_of_aggregation_switches):
+            for k in range(num_of_edge_switches):
+                topo.add_edge("Pod {} aggregation switch {}".format(i, j),
+                              "Pod {} edge switch {}".format(i, k))
+                # print topo.nodes["Pod {} aggregation switch {}".format(i, j)]
+                topo.nodes["Pod {} aggregation switch {}".format(i, j)]["Pod {} edge switch {}".format(i, k)] = len(topo.nodes["Pod {} aggregation switch {}".format(i, j)]) + 1
+                topo.nodes["Pod {} edge switch {}".format(i, k)]["Pod {} aggregation switch {}".format(i, j)] = len(topo.nodes["Pod {} edge switch {}".format(i, k)]) + 1
+                # print topo.nodes["Pod {} aggregation switch {}".format(i, j)]
+
+    # add edge among core and aggregation switch
+    # AB胖树和传统胖树不一样的地方就在aggregation和core的连接方式上
+    # 我们要把pod按照A，B，A，B分，然后B改用新的连接方式j, j+p^i j+2p^i...
+    p = n // 2 # 构造AB胖树需要的参数
+    num_of_core_switches_connected_to_same_aggregation_switch = num_of_core_switches // num_of_aggregation_switches
+    for i in range(num_of_core_switches):
+        topo.add_node("Core switch {}".format(i))
+
+    for i in range(n):
+        if i % 2 == 0: # type A
+            for j in range(num_of_edge_switches):
+                for k in range(j*p, (j+1)*p):
+                    topo.add_edge("Pod {} aggregation switch {}".format(i, j), "Core switch {}".format(k))
+                    topo.nodes["Pod {} aggregation switch {}".format(i, j)]["Core switch {}".format(k)] = len(topo.nodes["Pod {} aggregation switch {}".format(i, j)]) + 1
+                    topo.nodes["Core switch {}".format(k)]["Pod {} aggregation switch {}".format(i, j)] = len(topo.nodes["Core switch {}".format(k)]) + 1
+        else: # type B 
+            for j in range(num_of_edge_switches):
+                index = 0
+                k = j + index * p # 这里 i 为 1，所以p^1 = p
+                while k < num_of_core_switches:
+                    topo.add_edge("Pod {} aggregation switch {}".format(i, j), "Core switch {}".format(k))
+                    topo.nodes["Pod {} aggregation switch {}".format(i, j)]["Core switch {}".format(k)] = len(topo.nodes["Pod {} aggregation switch {}".format(i, j)]) + 1
+                    topo.nodes["Core switch {}".format(k)]["Pod {} aggregation switch {}".format(i, j)] = len(topo.nodes["Core switch {}".format(k)]) + 1
+                    index += 1
+                    k = j + index * p
+
+    topo.name = 'AB-fat-tree'
+
+    return topo
 
 if __name__ == '__main__':
     topo = fat_tree_topo()
