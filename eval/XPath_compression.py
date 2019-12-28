@@ -170,7 +170,7 @@ def count_AIB(matrix):
                 cur_AIB += 1
                 pre_port = temp[m][0]
         result.append(cur_AIB)
-    print 'XPath compression result:', result
+    # print 'XPath compression result:', result
     return result
 
 

@@ -64,7 +64,7 @@ def eval_memory_overhead(topo):
         d = path[-1]
         paths_failover.append(dijkstra_base.shortest_path_with_failure(topo, s, d, next_hop))
 
-    print len(paths_failover)
+    # print len(paths_failover)
 
     entry_sum = 0
     paths_XPath = []
@@ -72,12 +72,19 @@ def eval_memory_overhead(topo):
         entry_sum += len(path) - 1
         paths_XPath.append(path2XPath_path(topo, path))
 
-    print 'Naive 1:1 avg memory overhead:', float(entry_sum) / 20
+    print 'Naive 1:1 avg memory overhead:', float(entry_sum) / len(topo.nodes)
     # for h in paths_XPath:
     #     print h
     compression_result = XPath_compression.XPath_compression(paths_XPath)
     print 'XPath compression memory overhead:', compression_result
 
+    port_sum = 0
+    for node in topo.nodes:
+        port_sum += len(topo.nodes[node])
+    
+    print 'Our solution memory overhead:', float(port_sum) / len(topo.nodes)
+
 if __name__ == '__main__':
+    print 'Topo: fat-tree(4).'
     topo = eval_topo.fat_tree_topo()
     eval_memory_overhead(topo)
