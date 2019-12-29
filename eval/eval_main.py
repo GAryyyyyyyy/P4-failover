@@ -69,15 +69,25 @@ def eval_recovery_path_length_overhead(topo, sample_sum = 100):
         path_overhead_sum_our_solution += path_overhead_our_solution
         sample_count += 1
 
-    print 'Optimal avg path length overhead: {} hops/fail'.format( float(path_overhead_sum_optimal) / sample_sum )
-    print 'Our solution avg path length overhead: {} hops/fail'.format( float(path_overhead_sum_our_solution) / sample_sum )
-        
+    # print 'Optimal avg path length overhead: {} hops/fail'.format( float(path_overhead_sum_optimal) / sample_sum )
+    # print 'Our solution avg path length overhead: {} hops/fail'.format( float(path_overhead_sum_our_solution) / sample_sum )
+    return float(path_overhead_sum_optimal) / sample_sum, float(path_overhead_sum_our_solution) / sample_sum 
 
 if __name__ == '__main__':
-    # topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/BtAsiaPac.gml')
-    topo = eval_topo.fat_tree_topo(16)
+    topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/Sprint.gml')
+    # topo = eval_topo.AB_fat_tree_topo(32)
     print 'Topo:', topo.name
     print '# of switches:', len(topo.nodes)
     print '# of links:', len(topo.edges)
-    # eval_memory_overhead(topo)
-    eval_recovery_path_length_overhead(topo, 100)
+    eval_memory_overhead(topo)
+
+    optimal_sum = 0
+    our_solution_sum = 0
+    for i in range(10):
+        optimal, our_solution = eval_recovery_path_length_overhead(topo, 100)
+        optimal_sum += optimal
+        our_solution_sum += our_solution
+
+    print 'Optimal avg path length overhead: {} hops/fail'.format( optimal_sum / 10 )
+    print 'Our solution avg path length overhead: {} hops/fail'.format( our_solution_sum / 10 )
+    
