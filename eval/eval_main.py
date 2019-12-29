@@ -74,8 +74,8 @@ def eval_recovery_path_length_overhead(topo, sample_sum = 100):
     return float(path_overhead_sum_optimal) / sample_sum, float(path_overhead_sum_our_solution) / sample_sum 
 
 if __name__ == '__main__':
-    topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/Sprint.gml')
-    # topo = eval_topo.AB_fat_tree_topo(32)
+    topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/Xspedius.gml')
+    # topo = eval_topo.vl2_topo(64)
     print 'Topo:', topo.name
     print '# of switches:', len(topo.nodes)
     print '# of links:', len(topo.edges)
