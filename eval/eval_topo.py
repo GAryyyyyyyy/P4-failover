@@ -6,6 +6,8 @@ def fat_tree_topo(n=4):
     """Standard fat tree topology
     n: number of pods
     total n^3/4 servers
+    total 5*n^2/4 switches
+    total 3*n^3/4 links
     """
     topo = nx.Graph()
     num_of_edge_switches = n // 2
@@ -42,7 +44,7 @@ def fat_tree_topo(n=4):
             topo.nodes["Core switch {}".format(i)]["Pod {} aggregation switch {}".format(j, aggregation_switch_index_in_pod)] = len(topo.nodes["Core switch {}".format(i)]) + 1
             topo.nodes["Pod {} aggregation switch {}".format(j, aggregation_switch_index_in_pod)]["Core switch {}".format(i)] = len(topo.nodes["Pod {} aggregation switch {}".format(j, aggregation_switch_index_in_pod)]) + 1
 
-    topo.name = 'fat-tree'
+    topo.name = "fat-tree({})".format(n)
 
     return topo
 
@@ -146,7 +148,17 @@ def AB_fat_tree_topo(n=4):
                     index += 1
                     k = j + index * p
 
-    topo.name = 'AB-fat-tree'
+    topo.name = "AB-fat-tree({})".format(n)
+
+    return topo
+
+def topology_zoo_topo(gml_file):
+    topo = nx.readwrite.read_gml(gml_file)
+    for edge in topo.edges:
+        node0 = edge[0]
+        node1 = edge[1]
+        topo.nodes[node0][node1] = len(topo.nodes[node0]) + 1
+        topo.nodes[node1][node0] = len(topo.nodes[node1]) + 1
 
     return topo
 
