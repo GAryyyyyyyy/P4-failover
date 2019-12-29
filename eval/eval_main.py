@@ -7,40 +7,6 @@ import eval_topo
 import dijkstra_base
 import XPath_compression
 
-def eval_avg_recovery_len(topo):
-    # print len(topo.edges)
-    total_len = 0 
-    len_normal = 0
-    len_failed = 0
-    for edge in topo.edges:
-        len_normal = dijkstra_base.avg_path_length_dijkstra(topo, edge[0])
-        topo.remove_edge(edge[0], edge[1])
-        len_failed = dijkstra_base.avg_path_length_dijkstra(topo, edge[0])
-        if len_failed != 0:
-            total_len += (len_failed - len_normal)
-
-        len_failed = dijkstra_base.avg_path_length_dijkstra(topo, edge[1])
-        topo.add_edge(edge[0], edge[1])
-        len_normal = dijkstra_base.avg_path_length_dijkstra(topo, edge[1])
-        if len_failed != 0:
-            total_len += (len_failed - len_normal)
-        # print ''
-    
-    # print total_len
-    avg_len = total_len / len(topo.edges)
-    print 'Optimal avg recovery len overhead:', avg_len
-
-    total_len = 0
-    for edge in topo.edges:
-        len_normal = 1
-        len_failed = dijkstra_base.shortest_path_len_with_failure(topo, edge, edge[0], edge[1])
-        total_len += (len_failed - len_normal)
-        len_failed = dijkstra_base.shortest_path_len_with_failure(topo, edge, edge[1], edge[0])
-        total_len += (len_failed - len_normal)
-
-    avg_len = total_len / len(topo.edges)
-    print 'Our solution avg recovery len overhead:', avg_len
-
 
 def _path2XPath_path(topo, path):
     port = []
