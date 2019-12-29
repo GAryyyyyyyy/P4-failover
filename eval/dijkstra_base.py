@@ -28,6 +28,31 @@ def shortest_path_len_with_failure(topo, failed_edge, s, d):
     
     return len(path) - 1
 
+def port_based_recovery_path_dijkstra(topo, s, d):
+    topo.remove_edge(s, d)
+
+    q = [(0, s, [])]
+    visited = []
+    while q:
+        cost, node, path = heappop(q)
+        if node not in visited:
+            visited.append(node)
+            path = path[:]
+            path.append(node)
+            if node == d:
+                break
+            for new_node in topo.adj[node]:
+                if new_node not in visited:
+                    heappush(q, (cost + 1, new_node, path))
+    
+    topo.add_edge(s, d)
+
+    if node == d:
+        return path
+    else:
+        return [] 
+
+
 def shortest_path_with_failure(topo, s, d, next_hop):
     topo.remove_edge(s, next_hop)
 
@@ -45,20 +70,18 @@ def shortest_path_with_failure(topo, s, d, next_hop):
                 if new_node not in visited:
                     heappush(q, (cost + 1, new_node, path))
 
-    # if node == d:
-        # print path
-    # else:
-    #     print 0 
-
     topo.add_edge(s, next_hop)
     
-    return path
+    if node == d:
+        return path
+    else:
+        return [] 
 
 def avg_path_length_dijkstra(topo, s):
     total_length = 0
     q = [(0, s, [])]
     visited = []
-    while len(visited) < len(topo.nodes):
+    while len(visited) < len(topo.nodes) and q:
         cost, node, path = heappop(q)
         if node not in visited:
             visited.append(node)
@@ -69,7 +92,11 @@ def avg_path_length_dijkstra(topo, s):
             for new_node in topo.adj[node]:
                 if new_node not in visited:
                     heappush(q, (cost + 1, new_node, path))
-    avg_length = float(total_length) / (len(topo.nodes) - 1)
+    print 'visited:', len(visited)
+    if len(visited) > 1:
+        avg_length = float(total_length) / (len(visited) - 1)
+    else:
+        avg_length = 0
     # print avg_length
     return avg_length
 
