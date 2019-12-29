@@ -7,7 +7,7 @@ import eval_topo
 import dijkstra_base
 import XPath_compression
 import eval_backup_config_calculate
-
+import eval_fail_recovery
 
 def _path2XPath_path(topo, path):
     port = []
@@ -87,9 +87,14 @@ def eval_backup_config_calculation_overhead(topo):
     print 'Back up configuration calculation time:', end_time - start_time
 
 
+def eval_fail_recovery_rate(topo, fail_rate=0.054):
+    flows = eval_fail_recovery.random_flows(topo)
+    failed_edges = eval_fail_recovery.fail_model(topo, fail_rate)
+    eval_fail_recovery.naive_fail_recovery(topo, flows, failed_edges)
+
 if __name__ == '__main__':
     # topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/Xspedius.gml')
-    topo = eval_topo.vl2_topo(32)
+    topo = eval_topo.fat_tree_topo(8)
     print 'Topo:', topo.name
     print '# of switches:', len(topo.nodes)
     print '# of links:', len(topo.edges)
@@ -105,5 +110,7 @@ if __name__ == '__main__':
     # print 'Optimal avg path length overhead: {} hops/fail'.format( optimal_sum / 10 )
     # print 'Our solution avg path length overhead: {} hops/fail'.format( our_solution_sum / 10 )
 
-    eval_backup_config_calculation_overhead(topo)
+    # eval_backup_config_calculation_overhead(topo)
+
+    eval_fail_recovery_rate(topo)
     
