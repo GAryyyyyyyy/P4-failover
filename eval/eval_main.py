@@ -2,10 +2,11 @@
 
 import random
 import time
-
+import datetime
 import eval_topo
 import dijkstra_base
 import XPath_compression
+import eval_backup_config_calculate
 
 
 def _path2XPath_path(topo, path):
@@ -73,21 +74,36 @@ def eval_recovery_path_length_overhead(topo, sample_sum = 100):
     # print 'Our solution avg path length overhead: {} hops/fail'.format( float(path_overhead_sum_our_solution) / sample_sum )
     return float(path_overhead_sum_optimal) / sample_sum, float(path_overhead_sum_our_solution) / sample_sum 
 
+def _topo_wrapper(topo):
+    # 由于备份路径的计算需要每条边有个name属性，所以在这里加上了
+    for edge in topo.edges:
+        topo[edge[0]][edge[1]]['name'] = 'HAHA'
+
+def eval_backup_config_calculation_overhead(topo):
+    _topo_wrapper(topo)
+    start_time = datetime.datetime.now()
+    eval_backup_config_calculate.calculate_backup_configs(topo)
+    end_time = datetime.datetime.now()
+    print 'Back up configuration calculation time:', end_time - start_time
+
+
 if __name__ == '__main__':
-    topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/Xspedius.gml')
-    # topo = eval_topo.vl2_topo(64)
+    # topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/Xspedius.gml')
+    topo = eval_topo.vl2_topo(32)
     print 'Topo:', topo.name
     print '# of switches:', len(topo.nodes)
     print '# of links:', len(topo.edges)
-    eval_memory_overhead(topo)
+    # eval_memory_overhead(topo)
 
-    optimal_sum = 0
-    our_solution_sum = 0
-    for i in range(10):
-        optimal, our_solution = eval_recovery_path_length_overhead(topo, 100)
-        optimal_sum += optimal
-        our_solution_sum += our_solution
+    # optimal_sum = 0
+    # our_solution_sum = 0
+    # for i in range(10):
+    #     optimal, our_solution = eval_recovery_path_length_overhead(topo, 100)
+    #     optimal_sum += optimal
+    #     our_solution_sum += our_solution
 
-    print 'Optimal avg path length overhead: {} hops/fail'.format( optimal_sum / 10 )
-    print 'Our solution avg path length overhead: {} hops/fail'.format( our_solution_sum / 10 )
+    # print 'Optimal avg path length overhead: {} hops/fail'.format( optimal_sum / 10 )
+    # print 'Our solution avg path length overhead: {} hops/fail'.format( our_solution_sum / 10 )
+
+    eval_backup_config_calculation_overhead(topo)
     
