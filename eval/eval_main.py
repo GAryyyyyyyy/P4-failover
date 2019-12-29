@@ -25,7 +25,9 @@ def eval_memory_overhead(topo):
         s = path[0]
         next_hop = path[1]
         d = path[-1]
-        paths_failover.append(dijkstra_base.shortest_path_with_failure(topo, s, d, next_hop))
+        path_failover = dijkstra_base.shortest_path_with_first_hop_failure(topo, s, d, next_hop)
+        if len(path_failover) > 0:
+            paths_failover.append(path_failover)
 
     # print len(paths_failover)
 
@@ -49,18 +51,15 @@ def eval_memory_overhead(topo):
 
 
 def eval_recovery_path_length_overhead(topo, sample_sum = 100):
-    paths_origin = []
-    for node in topo.nodes:
-        paths_origin.extend(dijkstra_base.shortest_path_dijkstra(topo, node))
-    
     path_overhead_sum_optimal = 0
     path_overhead_sum_our_solution = 0
     sample_count = 0
     while sample_count < sample_sum:
-        selected_path = random.choice(paths_origin)
+        node_pair = random.sample(list(topo.nodes), 2) # 随机选取 源节点 和 目的节点
+        selected_path = dijkstra_base.shortest_path_with_dst_dijkstra(topo, node_pair[0], node_pair[1])
         # 利用dijkstra算出第一跳故障后的最优（最短）恢复路径
         path_length_origin = len(selected_path)
-        path_length_failover = len(dijkstra_base.shortest_path_with_failure(topo, selected_path[0], selected_path[-1], selected_path[1]))
+        path_length_failover = len(dijkstra_base.shortest_path_with_first_hop_failure(topo, selected_path[0], selected_path[-1], selected_path[1]))
         if path_length_failover == 0: #说明这个点无法进行故障恢复，直接跳过了
             continue
         path_overhead_sum_optimal += ( path_length_failover - path_length_origin )
@@ -75,11 +74,10 @@ def eval_recovery_path_length_overhead(topo, sample_sum = 100):
         
 
 if __name__ == '__main__':
-    topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/BtAsiaPac.gml')
-    # topo = eval_topo.AB_fat_tree_topo(8)
+    # topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/BtAsiaPac.gml')
+    topo = eval_topo.fat_tree_topo(16)
     print 'Topo:', topo.name
     print '# of switches:', len(topo.nodes)
     print '# of links:', len(topo.edges)
     # eval_memory_overhead(topo)
-    # eval_avg_recovery_len(topo)
-    eval_recovery_path_length_overhead(topo, 10)
+    eval_recovery_path_length_overhead(topo, 100)
