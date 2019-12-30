@@ -58,6 +58,9 @@ def port_based_fail_recovery(topo, flows, failed_edges):
         if len(edges & failed_edges) != 0:
             affected_flows.append(flow)
     
+    if len(affected_flows) == 0:
+        return -1
+
     recoveryed_flows = []
     for flow in affected_flows:
         if _port_based_fail_recovery(topo, flow, failed_edges, set()) == 1:
@@ -77,6 +80,9 @@ def naive_fail_recovery(topo, flows, failed_edges):
             edges.add((flow[i+1],flow[i]))
         if len(edges & failed_edges) != 0:
             affected_flows.append(flow)
+
+    if len(affected_flows) == 0:
+        return -1
 
     recoveryed_flows = []
     for flow in affected_flows:
