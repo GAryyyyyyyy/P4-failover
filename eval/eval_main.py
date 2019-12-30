@@ -87,14 +87,25 @@ def eval_backup_config_calculation_overhead(topo):
     print 'Back up configuration calculation time:', end_time - start_time
 
 
-def eval_fail_recovery_rate(topo, fail_rate=0.054):
-    flows = eval_fail_recovery.random_flows(topo)
-    failed_edges = eval_fail_recovery.fail_model(topo, fail_rate)
-    eval_fail_recovery.naive_fail_recovery(topo, flows, failed_edges)
+def eval_fail_recovery_rate(topo):
+    naive_recoveryed_rate_sum = 0
+    port_based_recoveryed_rate_sum = 0
+    for i in range(10):
+        flows = eval_fail_recovery.random_flows(topo, 100)
+        failed_edges = eval_fail_recovery.fail_model(topo)
+        naive_recoveryed_rate = eval_fail_recovery.naive_fail_recovery(topo, flows, failed_edges)
+        port_based_recoveryed_rate = eval_fail_recovery.port_based_fail_recovery(topo, flows, failed_edges)
+
+        naive_recoveryed_rate_sum += naive_recoveryed_rate
+        port_based_recoveryed_rate_sum += port_based_recoveryed_rate
+    
+    print 'Recovery Rate Result:'
+    print 'Naive recovery rate: {:.2f} %'.format(naive_recoveryed_rate_sum / 10 * 100)
+    print 'Port based recovery rate: {:.2f} %'.format(port_based_recoveryed_rate_sum / 10 * 100)
 
 if __name__ == '__main__':
     # topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/Xspedius.gml')
-    topo = eval_topo.fat_tree_topo(8)
+    topo = eval_topo.AB_fat_tree_topo(8)
     print 'Topo:', topo.name
     print '# of switches:', len(topo.nodes)
     print '# of links:', len(topo.edges)
