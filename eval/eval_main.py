@@ -81,10 +81,13 @@ def _topo_wrapper(topo):
 
 def eval_backup_config_calculation_overhead(topo):
     _topo_wrapper(topo)
-    start_time = datetime.datetime.now()
-    eval_backup_config_calculate.calculate_backup_configs(topo)
-    end_time = datetime.datetime.now()
-    print 'Back up configuration calculation time:', end_time - start_time
+    calculation_overhead_sum = 0
+    for i in range(10):
+        start_time = time.time()
+        eval_backup_config_calculate.calculate_backup_configs(topo)
+        end_time = time.time()
+        calculation_overhead_sum += (end_time - start_time)
+    print 'Back up configuration calculation time:', calculation_overhead_sum / 10
 
 
 def eval_fail_recovery_rate(topo):
@@ -107,8 +110,8 @@ def eval_fail_recovery_rate(topo):
     print 'Port based recovery rate: {:.2f} %'.format(port_based_recoveryed_rate_sum / 10 * 100)
 
 if __name__ == '__main__':
-    topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/BtAsiaPac.gml')
-    # topo = eval_topo.vl2_topo(32)
+    # topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/BtAsiaPac.gml')
+    topo = eval_topo.AB_fat_tree_topo(32)
     print 'Topo:', topo.name
     print '# of switches:', len(topo.nodes)
     print '# of links:', len(topo.edges)
@@ -124,7 +127,7 @@ if __name__ == '__main__':
     # print 'Optimal avg path length overhead: {} hops/fail'.format( optimal_sum / 10 )
     # print 'Our solution avg path length overhead: {} hops/fail'.format( our_solution_sum / 10 )
 
-    # eval_backup_config_calculation_overhead(topo)
+    eval_backup_config_calculation_overhead(topo)
 
-    eval_fail_recovery_rate(topo)
+    # eval_fail_recovery_rate(topo)
     
