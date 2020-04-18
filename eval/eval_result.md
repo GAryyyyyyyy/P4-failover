@@ -58,3 +58,10 @@
 ## Header Overhead
 TODO
 
+## Reactive Overhead
+|  | 2 | 3 | 4 | 5 | 6 | 7 |
+| :----: | :----: | :----: | :----: | :----: | :----: | :----: |
+|P4Neighbor| 19 ms | 24 ms | 30 ms | 34 ms | 41 ms | 51 ms|
+|Reactive| 87 ms | 96 ms |113 ms | 129 ms | 144 ms | 163 ms |
+|Diff| 68 ms | 72 ms | 83 ms | 95 ms | 103 ms | 112 ms |
+

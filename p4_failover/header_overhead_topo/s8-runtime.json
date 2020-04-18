@@ -4,26 +4,6 @@
   "bmv2_json": "build/simple_recovery.json",
   "table_entries": [
     {
-      "table": "MyIngress.edge_to_port",
-      "match": {
-        "meta.out_edge": [3]
-      },
-      "action_name": "MyIngress.recovery_forward",
-      "action_params": {
-        "port": 1
-      }
-    },
-    {
-      "table": "MyIngress.edge_to_port",
-      "match": {
-        "meta.out_edge": [4]
-      },
-      "action_name": "MyIngress.recovery_forward",
-      "action_params": {
-        "port": 2
-      }
-    },
-    {
       "table": "MyIngress.port_to_mac",
       "match": {
         "standard_metadata.egress_spec": [1]
