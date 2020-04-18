@@ -22,6 +22,7 @@ def eval_memory_overhead(topo):
         paths_normal.extend(dijkstra_base.shortest_path_dijkstra(topo, node))
     # 为每一条path计算第一条边故障时的备份路径
     paths_failover = []
+    start_time = time.time()
     for path in paths_normal:
         s = path[0]
         next_hop = path[1]
@@ -29,7 +30,8 @@ def eval_memory_overhead(topo):
         path_failover = dijkstra_base.shortest_path_with_first_hop_failure(topo, s, d, next_hop)
         if len(path_failover) > 0:
             paths_failover.append(path_failover)
-
+    end_time = time.time()
+    print end_time - start_time
     # print len(paths_failover)
 
     entry_sum = 0
@@ -41,7 +43,10 @@ def eval_memory_overhead(topo):
     print 'Naive 1:1 avg memory overhead:', float(entry_sum) / len(topo.nodes)
     # for h in paths_XPath:
     #     print h
+    start_time = time.time()
     compression_result = XPath_compression.XPath_compression(paths_XPath)
+    end_time = time.time()
+    print end_time - start_time
     print 'XPath compression memory overhead:', compression_result
 
     port_sum = 0
@@ -110,12 +115,12 @@ def eval_fail_recovery_rate(topo):
     print 'Port based recovery rate: {:.2f} %'.format(port_based_recoveryed_rate_sum / 10 * 100)
 
 if __name__ == '__main__':
-    # topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/BtAsiaPac.gml')
-    topo = eval_topo.AB_fat_tree_topo(32)
+    # topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/Xspedius.gml')
+    topo = eval_topo.vl2_topo(64)
     print 'Topo:', topo.name
     print '# of switches:', len(topo.nodes)
     print '# of links:', len(topo.edges)
-    # eval_memory_overhead(topo)
+    eval_memory_overhead(topo)
 
     # optimal_sum = 0
     # our_solution_sum = 0
@@ -127,7 +132,7 @@ if __name__ == '__main__':
     # print 'Optimal avg path length overhead: {} hops/fail'.format( optimal_sum / 10 )
     # print 'Our solution avg path length overhead: {} hops/fail'.format( our_solution_sum / 10 )
 
-    eval_backup_config_calculation_overhead(topo)
+    # eval_backup_config_calculation_overhead(topo)
 
     # eval_fail_recovery_rate(topo)
     
