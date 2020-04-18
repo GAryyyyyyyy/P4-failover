@@ -14,16 +14,6 @@
       }
     },
     {
-      "table": "MyIngress.edge_to_port",
-      "match": {
-        "meta.out_edge": [2]
-      },
-      "action_name": "MyIngress.recovery_forward",
-      "action_params": {
-        "port": 2
-      }
-    },
-    {
       "table": "MyIngress.port_to_mac",
       "match": {
         "standard_metadata.egress_spec": [1]

@@ -1,0 +1,59 @@
+s1
+{
+      "table": "MyIngress.port_backup_path",
+      "match": {
+        "standard_metadata.egress_spec": [2]
+      },
+      "action_name": "MyIngress.copy_path",
+      "action_params": {
+        "length": 2,
+        "v1": 1,
+        "v2": 2,
+        "v3": 0,
+        "v4": 0,
+        "v5": 0,
+        "v6": 0,
+        "v7": 0,
+        "v8": 0
+      }
+    },
+    {
+      "table": "MyIngress.edge_to_port",
+      "match": {
+        "meta.out_edge": [1]
+      },
+      "action_name": "MyIngress.recovery_forward",
+      "action_params": {
+        "port": 3
+      }
+    },
+
+
+
+
+    s3
+    {
+      "table": "MyIngress.edge_to_port",
+      "match": {
+        "meta.out_edge": [2]
+      },
+      "action_name": "MyIngress.recovery_forward",
+      "action_params": {
+        "port": 2
+      }
+    },
+
+
+
+    
+    s4
+    {
+      "table": "MyIngress.edge_to_port",
+      "match": {
+        "meta.out_edge": [2]
+      },
+      "action_name": "MyIngress.recovery_forward",
+      "action_params": {
+        "port": 3
+      }
+    },

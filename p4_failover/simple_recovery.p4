@@ -141,15 +141,20 @@ control MyIngress(inout headers hdr,
             meta.meta_bp_v7_hop=v7;
             meta.meta_bp_v8_hop=v8;
     }
+    
+    action send_to_controller() {
+        standard_metadata.egress_spec = (bit<9>) 1;
+    }
+
     table port_backup_path {
         key = {
             standard_metadata.egress_spec: exact;
         }
         actions = {
+            send_to_controller;
             copy_path;
-            drop;
         }
-        default_action = drop();
+        default_action = send_to_controller();
     }
 
     table port_backup_path_fault {

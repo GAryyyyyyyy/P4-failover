@@ -1,4 +1,4 @@
 BMV2_SWITCH_EXE = simple_switch_grpc
-TOPO = topo/topology.json
+TOPO = header_overhead_topo/topology.json
 
 include ../utils/Makefile
