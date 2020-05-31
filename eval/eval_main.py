@@ -8,6 +8,7 @@ import dijkstra_base
 import XPath_compression
 import eval_backup_config_calculate
 import eval_fail_recovery
+import openflow_compress
 
 def _path2XPath_path(topo, path):
     port = []
@@ -33,6 +34,8 @@ def eval_memory_overhead(topo):
     end_time = time.time()
     print end_time - start_time
     # print len(paths_failover)
+    # print paths_failover[0]
+    # return
 
     entry_sum = 0
     paths_XPath = []
@@ -43,6 +46,13 @@ def eval_memory_overhead(topo):
     print 'Naive 1:1 avg memory overhead:', float(entry_sum) / len(topo.nodes)
     # for h in paths_XPath:
     #     print h
+    start_time = time.time()
+    openflow_compress_result = openflow_compress.openflow_compression(paths_failover)
+    end_time = time.time()
+    print end_time - start_time
+    print 'Openflow compression memory overhead:', float(openflow_compress_result) / len(topo.nodes)
+    return
+
     start_time = time.time()
     compression_result = XPath_compression.XPath_compression(paths_XPath)
     end_time = time.time()
@@ -115,8 +125,8 @@ def eval_fail_recovery_rate(topo):
     print 'Port based recovery rate: {:.2f} %'.format(port_based_recoveryed_rate_sum / 10 * 100)
 
 if __name__ == '__main__':
-    # topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/Xspedius.gml')
-    topo = eval_topo.vl2_topo(64)
+    topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/Uunet.gml')
+    # topo = eval_topo.vl2_topo(32)
     print 'Topo:', topo.name
     print '# of switches:', len(topo.nodes)
     print '# of links:', len(topo.edges)
