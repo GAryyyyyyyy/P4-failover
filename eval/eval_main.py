@@ -112,6 +112,7 @@ def eval_fail_recovery_rate(topo):
     while iteration_time < 10:
         flows = eval_fail_recovery.random_flows(topo, 100)
         failed_edges = eval_fail_recovery.fail_model(topo, 0.028)
+        # failed_edges = eval_fail_recovery.fail_model(topo, 0.28)
         naive_recoveryed_rate = eval_fail_recovery.naive_fail_recovery(topo, flows, failed_edges)
         port_based_recoveryed_rate = eval_fail_recovery.port_based_fail_recovery(topo, flows, failed_edges)
         if naive_recoveryed_rate == -1:
@@ -123,6 +124,17 @@ def eval_fail_recovery_rate(topo):
     print 'Recovery Rate Result:'
     print 'Naive recovery rate: {:.2f} %'.format(naive_recoveryed_rate_sum / 10 * 100)
     print 'Port based recovery rate: {:.2f} %'.format(port_based_recoveryed_rate_sum / 10 * 100)
+
+def eval_fail_type(topo):
+    link_fail_count = 4
+    failed_edges = eval_fail_recovery.fail_model(topo, 0.028)
+    flows = eval_fail_recovery.normal_flows(topo, failed_edges, 100, link_fail_count)
+    recovery_sum = eval_fail_recovery.naive_n_link_fail(topo, flows, failed_edges, link_fail_count)
+    print 'naive: {}'.format(recovery_sum)
+
+    recovery_sum = eval_fail_recovery.port_based_n_link_fail(topo, flows, failed_edges, link_fail_count)
+    print 'P4Neighbor: {}'.format(recovery_sum)
+
 
 if __name__ == '__main__':
     # topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/Uunet.gml')
@@ -143,7 +155,8 @@ if __name__ == '__main__':
     # print 'Optimal avg path length overhead: {} hops/fail'.format( optimal_sum / 10 )
     # print 'Our solution avg path length overhead: {} hops/fail'.format( our_solution_sum / 10 )
 
-    eval_fail_recovery_rate(topo)
+    # eval_fail_recovery_rate(topo)
+    eval_fail_type(topo)
 
     # eval_backup_config_calculation_overhead(topo)
 
