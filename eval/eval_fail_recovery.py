@@ -4,6 +4,17 @@ import random
 import dijkstra_base
 
 
+def fail_type_analysis(flows, edges):
+    d = {}
+    for flow in flows:
+        count = 0
+        for i in range(0, len(flow)-1):
+            if (flow[i], flow[i+1]) in edges or (flow[i+1], flow[i]) in edges:
+                count += 1
+        d[count] = d.get(count, 0) + 1
+    print d
+
+
 def random_flows(topo, num_of_flows = 50):
     flows = []
     for i in range(num_of_flows):
@@ -66,6 +77,9 @@ def port_based_fail_recovery(topo, flows, failed_edges):
         if _port_based_fail_recovery(topo, flow, failed_edges, set()) == 1:
             recoveryed_flows.append(flow)
 
+    print 'Port-based recovered flows:'
+    fail_type_analysis(recoveryed_flows, failed_edges)
+    
     # print 'Port based recovery result:'
     # print len(affected_flows)
     # print len(recoveryed_flows)
@@ -84,6 +98,9 @@ def naive_fail_recovery(topo, flows, failed_edges):
     if len(affected_flows) == 0:
         return -1
 
+    print 'Failed flows:'
+    fail_type_analysis(affected_flows, failed_edges)
+
     recoveryed_flows = []
     for flow in affected_flows:
         for i in range(0, len(flow) - 1):
@@ -98,7 +115,9 @@ def naive_fail_recovery(topo, flows, failed_edges):
                     recoveryed_flows.append(flow)
                 break
 
-
+    
+    print 'Naive recovered flows:'
+    fail_type_analysis(recoveryed_flows, failed_edges)
     # print len(flows)
     # print 'Naive recovery result:'
     # print len(affected_flows)

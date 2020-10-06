@@ -126,7 +126,7 @@ def eval_fail_recovery_rate(topo):
 
 if __name__ == '__main__':
     # topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/Uunet.gml')
-    topo = eval_topo.fat_tree_topo(8)
+    topo = eval_topo.fat_tree_topo(16)
     print 'Topo:', topo.name
     print '# of switches:', len(topo.nodes)
     print '# of links:', len(topo.edges)
@@ -143,8 +143,8 @@ if __name__ == '__main__':
     # print 'Optimal avg path length overhead: {} hops/fail'.format( optimal_sum / 10 )
     # print 'Our solution avg path length overhead: {} hops/fail'.format( our_solution_sum / 10 )
 
-    # eval_fail_recovery_rate(topo)
+    eval_fail_recovery_rate(topo)
 
-    eval_backup_config_calculation_overhead(topo)
+    # eval_backup_config_calculation_overhead(topo)
 
     
