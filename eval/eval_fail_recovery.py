@@ -11,9 +11,18 @@ def fail_type_analysis(flows, edges):
         for i in range(0, len(flow)-1):
             if (flow[i], flow[i+1]) in edges or (flow[i+1], flow[i]) in edges:
                 count += 1
+        if count == 0:
+            continue
         d[count] = d.get(count, 0) + 1
-    print d
+    # print d
+    return d
 
+def _cal_failure_len(flow, failed_edges):
+    edges = set()
+    for i in range(0,len(flow) - 1):
+        edges.add((flow[i],flow[i+1]))
+        edges.add((flow[i+1],flow[i]))
+    return len(edges & failed_edges)
 
 def random_flows(topo, num_of_flows = 50):
     flows = []
@@ -66,15 +75,17 @@ def _port_based_fail_recovery(topo, flow, failed_edges, failover_from):
                 edges.add((new_flow_path[j+1],new_flow_path[j]))
 
             if len(edges & failover_from) != 0:
-                return -1
+                return -1, len(failover_from) / 2 + 1
 
             if len(edges & failed_edges) == 0:
-                return 1
+                return 1, len(failover_from) / 2
             else:
                 return _port_based_fail_recovery(topo, new_flow_path, failed_edges, failover_from)
-    return 1 # 成功恢复
+    return 1, len(failover_from) / 2 # 成功恢复
 
 def port_based_fail_recovery(topo, flows, failed_edges):
+    total_dict = {}
+    success_dict = {}
     affected_flows = []
     for flow in flows:
         edges = set()
@@ -85,20 +96,22 @@ def port_based_fail_recovery(topo, flows, failed_edges):
             affected_flows.append(flow)
     
     if len(affected_flows) == 0:
-        return -1
+        return None, None
 
-    recoveryed_flows = []
     for flow in affected_flows:
-        if _port_based_fail_recovery(topo, flow, failed_edges, set()) == 1:
-            recoveryed_flows.append(flow)
+        recovery_result, failure_len = _port_based_fail_recovery(topo, flow, failed_edges, set()) 
+        if recovery_result == 1:
+            success_dict[failure_len] = success_dict.get(failure_len, 0) + 1
+        total_dict[failure_len] = total_dict.get(failure_len, 0) + 1
 
-    print 'Port-based recovered flows:'
-    fail_type_analysis(recoveryed_flows, failed_edges)
+    # print total_dict
+    # print success_dict
     
     # print 'Port based recovery result:'
     # print len(affected_flows)
     # print len(recoveryed_flows)
-    return float(len(recoveryed_flows)) / len(affected_flows)
+    
+    return total_dict, success_dict
 
 def port_based_n_link_fail(topo, flows, failed_edges, n):
     count = 0
@@ -118,6 +131,7 @@ def port_based_n_link_fail(topo, flows, failed_edges, n):
 
 def _naive_fail_recovery(topo, flow, failed_edges):
     for i in range(0, len(flow) - 1):
+        failure_len = _cal_failure_len(flow, failed_edges)
         if (flow[i], flow[i+1]) in failed_edges or (flow[i+1], flow[i]) in failed_edges:
             #说明下一跳出故障了
             recovery_path = dijkstra_base.shortest_path_with_first_hop_failure(topo, flow[i], flow[-1], flow[i+1])
@@ -126,9 +140,9 @@ def _naive_fail_recovery(topo, flow, failed_edges):
                 edges.add((recovery_path[j],recovery_path[j+1]))
                 edges.add((recovery_path[j+1],recovery_path[j]))
             if len(edges & failed_edges) == 0:
-                return 1
-            break
-    return -1
+                return 1, failure_len
+            else:
+                return -1, failure_len + len(edges & failed_edges) 
 
 def naive_fail_recovery(topo, flows, failed_edges):
     affected_flows = []
@@ -141,15 +155,17 @@ def naive_fail_recovery(topo, flows, failed_edges):
             affected_flows.append(flow)
 
     if len(affected_flows) == 0:
-        return -1
+        return None, None
 
-    print 'Failed flows:'
-    fail_type_analysis(affected_flows, failed_edges)
 
-    recoveryed_flows = []
+    total_dict = {}
+    success_dict = {}
     for flow in affected_flows:
-        if _naive_fail_recovery(topo, flow, failed_edges) == 1:
-            recoveryed_flows.append(flow)
+        recovery_result, failure_len = _naive_fail_recovery(topo, flow, failed_edges)
+        if recovery_result == 1:
+            success_dict[failure_len] = success_dict.get(failure_len, 0) + 1
+        total_dict[failure_len] = total_dict.get(failure_len, 0) + 1
+        
         # for i in range(0, len(flow) - 1):
         #     if (flow[i], flow[i+1]) in failed_edges or (flow[i+1], flow[i]) in failed_edges:
         #         #说明下一跳出故障了
@@ -162,14 +178,12 @@ def naive_fail_recovery(topo, flows, failed_edges):
         #             recoveryed_flows.append(flow)
         #         break
 
-    
-    print 'Naive recovered flows:'
-    fail_type_analysis(recoveryed_flows, failed_edges)
     # print len(flows)
     # print 'Naive recovery result:'
     # print len(affected_flows)
     # print len(recoveryed_flows)
-    return float(len(recoveryed_flows)) / len(affected_flows)
+    # return float(len(recoveryed_flows)) / len(affected_flows), fail_type_analysis(recoveryed_flows, failed_edges)
+    return total_dict, success_dict
 
 def naive_n_link_fail(topo, flows, failed_edges, n):
     count = 0

@@ -104,26 +104,58 @@ def eval_backup_config_calculation_overhead(topo):
         calculation_overhead_sum += (end_time - start_time)
     print 'Backup configuration calculation time: {}s'.format(calculation_overhead_sum / 10) 
 
+def _merge_dict(dict1, dict2):
+    for key in dict1:
+        dict2[key] = dict2.get(key, 0) + dict1[key]
+    return dict2
+
 
 def eval_fail_recovery_rate(topo):
-    naive_recoveryed_rate_sum = 0
-    port_based_recoveryed_rate_sum = 0
+    total_flow_statistic = dict()
+    naive_total_flow_statistic = dict()
+    naive_recovered_flow_statistic = dict()
+    port_based_total_flow_statistic = dict()
+    port_based_recovered_flow_statistic = dict()
     iteration_time = 0
     while iteration_time < 10:
-        flows = eval_fail_recovery.random_flows(topo, 100)
-        failed_edges = eval_fail_recovery.fail_model(topo, 0.028)
-        # failed_edges = eval_fail_recovery.fail_model(topo, 0.28)
-        naive_recoveryed_rate = eval_fail_recovery.naive_fail_recovery(topo, flows, failed_edges)
-        port_based_recoveryed_rate = eval_fail_recovery.port_based_fail_recovery(topo, flows, failed_edges)
-        if naive_recoveryed_rate == -1:
+        flows = eval_fail_recovery.random_flows(topo, 1000)
+        # failed_edges = eval_fail_recovery.fail_model(topo, 0.028) # For WAN
+        failed_edges = eval_fail_recovery.fail_model(topo) # For DC
+        total_flow_statistic = _merge_dict(total_flow_statistic, eval_fail_recovery.fail_type_analysis(flows, failed_edges)) 
+
+        total_statistic, success_statistic = eval_fail_recovery.naive_fail_recovery(topo, flows, failed_edges)
+        if total_statistic == None:
             continue # 说明这次没有流受到故障的影响
+        naive_total_flow_statistic = _merge_dict(naive_total_flow_statistic, total_statistic)
+        naive_recovered_flow_statistic = _merge_dict(naive_recovered_flow_statistic, success_statistic)
+
+        total_statistic, success_statistic = eval_fail_recovery.port_based_fail_recovery(topo, flows, failed_edges)
+        port_based_total_flow_statistic = _merge_dict(port_based_total_flow_statistic, total_statistic)
+        port_based_recovered_flow_statistic = _merge_dict(port_based_recovered_flow_statistic, success_statistic)
         iteration_time += 1
-        naive_recoveryed_rate_sum += naive_recoveryed_rate
-        port_based_recoveryed_rate_sum += port_based_recoveryed_rate
     
+    total_flows_num = 0
+    for value in total_flow_statistic.values():
+        total_flows_num += value
+
+    naive_recovered_flows_num = 0
+    for value in naive_recovered_flow_statistic.values():
+        naive_recovered_flows_num += value
+
+    port_based_recovered_flows_num = 0
+    for value in port_based_recovered_flow_statistic.values():
+        port_based_recovered_flows_num += value
     print 'Recovery Rate Result:'
-    print 'Naive recovery rate: {:.2f} %'.format(naive_recoveryed_rate_sum / 10 * 100)
-    print 'Port based recovery rate: {:.2f} %'.format(port_based_recoveryed_rate_sum / 10 * 100)
+    print 'Total flows: ' + str(total_flow_statistic)
+
+    print '  Naive Result:'
+    print '    Total flows' + str(naive_total_flow_statistic) + ' (sum: ' + str(total_flows_num) + ')'
+    print '    Recovered flows' + str(naive_recovered_flow_statistic) + ' (sum: ' + str(naive_recovered_flows_num) + ')'
+    print '    Recovery ratio: {:.2f} %'.format(float(naive_recovered_flows_num) / total_flows_num * 100)
+    print '  P4Neighbor Result:'
+    print '    Total flows' + str(port_based_total_flow_statistic)
+    print '    Recovered flows' + str(port_based_recovered_flow_statistic) + ' (sum: ' + str(port_based_recovered_flows_num) + ')'
+    print '    Recovery ratio: {:.2f} %'.format(float(port_based_recovered_flows_num) / total_flows_num * 100)
 
 def eval_fail_type(topo):
     link_fail_count = 4
@@ -137,8 +169,10 @@ def eval_fail_type(topo):
 
 
 if __name__ == '__main__':
+    # topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/BtAsiaPac.gml')
     # topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/Uunet.gml')
-    topo = eval_topo.fat_tree_topo(16)
+    # topo = eval_topo.topology_zoo_topo('./topology_zoo_topo/Xspedius.gml')
+    topo = eval_topo.AB_fat_tree_topo(16)
     print 'Topo:', topo.name
     print '# of switches:', len(topo.nodes)
     print '# of links:', len(topo.edges)
@@ -155,8 +189,8 @@ if __name__ == '__main__':
     # print 'Optimal avg path length overhead: {} hops/fail'.format( optimal_sum / 10 )
     # print 'Our solution avg path length overhead: {} hops/fail'.format( our_solution_sum / 10 )
 
-    # eval_fail_recovery_rate(topo)
-    eval_fail_type(topo)
+    eval_fail_recovery_rate(topo)
+    # eval_fail_type(topo)
 
     # eval_backup_config_calculation_overhead(topo)
 

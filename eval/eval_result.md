@@ -53,6 +53,76 @@
 | UUNET | 47 | 84 | 90.71% | 94.71% | 4.00% |
 | Xspedius | 34 | 49 | 94.04% | 97.14% | 3.10% |
 
+
+| Fat-tree-2(n=16) | 1-failure | 2-failure | 3-failure | 4-failure | 5-failure | Total |
+| :----: | :----: | :----: | :----: | :----: | :----: | :----: |
+| Naive | 1148 | 207 | 48 | 5 | 0 | 1408 |
+| Naive-Recovered | 1148 | 29 | 1 | 0 | 0 | 1178(83.66%) |
+| P4Neighbor | 1129 | 165 | 82 | 30 | 2 | 1408 |
+| P4Neighbor-Recovered | 1129 | 165 | 10 | 4 | 0 | 1308(92.90%) |
+
+| F10-2(n=16) | 1-failure | 2-failure | 3-failure | 4-failure | 5-failure | Total |
+| :----: | :----: | :----: | :----: | :----: | :----: | :----: |
+| Naive | 1186 | 275 | 33 | 4 | 0 | 1501 |
+| Naive-Recovered | 1186 | 49 | 0 | 0 | 0 | 1235(82.28%) |
+| P4Neighbor | 1206 | 153 | 129 | 13 | 0 | 1501 |
+| P4Neighbor-Recovered | 1206 | 153 | 7 | 0 | 0 | 1366(91.01%) |
+
+
+
+<!-- new eval result
+| Topo | Naive | P4Neigibor|
+| :----: | :----: | :----: |
+| Fat-tree-2(n=16) | 85.32% | 94.72% |
+| F10-2(n=16) | 93.86% | 99.50% |
+| Vl2-2(n=32) | 90.86% | 97.74% |
+| BtAsiaPac | 95.61% | 100% |
+| UUNET | 86.68% | 92.79% |
+| Xspedius | 82.86% | 96.63% |
+
+
+Fat-tree-2(n=16)
+||1-failure|2-failure|
+| :----: | :----: | :----: |
+|Total| 836 | 35 | 1 |
+|naive| 726 | 18 | 0 |
+|P4Neighbor| 799 | 26 |  1 |
+
+F10-2(n=16)
+||1-failure|2-failure|
+| :----: | :----: | :----: |
+|Total| 781 | 17 |
+|naive| 736 | 13 |
+|P4Neighbor| 777 | 17 |
+
+Vl2-2(n=32)
+||1-failure|2-failure|
+| :----: | :----: | :----: |
+|Total| 857 | 28 | 1 |
+|naive| 795 | 10 | 0 |
+|P4Neighbor| 847 | 19 | 0 |
+
+BtAsiaPac
+||1-failure|2-failure|
+| :----: | :----: | :----: |
+|Total| 645 | 28 |
+|naive| 641 | 12 |
+|P4Neighbor| 445 | 28 |
+
+UUNET
+||1-failure|2-failure|
+| :----: | :----: | :----: |
+|Total| 451 | 7 |
+|naive| 392 | 5 |
+|P4Neighbor| 418 | 7 |
+
+Xspedius
+||1-failure|2-failure|3-failure|
+| :----: | :----: | :----: | :----: |
+|Total| 689 | 47 | 5 |
+|naive| 597 | 17 | 0 |
+|P4Neighbor| 664 | 47 | 5 | -->
+
 <!-- 同样，趋势是没错的，不过后续有时间考虑再多次平均，尽可能让结果客观公正 -->
 
 ## Header Overhead
