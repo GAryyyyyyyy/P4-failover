@@ -69,6 +69,38 @@
 | P4Neighbor-Recovered | 1206 | 153 | 7 | 0 | 0 | 1366(91.01%) |
 
 
+| VL2-2(n=32) | 1-failure | 2-failure | 3-failure | 4-failure | 5-failure | Total |
+| :----: | :----: | :----: | :----: | :----: | :----: | :----: |
+| Naive | 1447 | 240 | 67 | 4 | 0 | 1758 |
+| Naive-Recovered | 1447 | 77 | 0 | 0 | 0 | 1524(86.69%) |
+| P4Neighbor | 1458 | 194| 97 | 9 | 0 | 1758 |
+| P4Neighbor-Recovered | 1458 | 194 | 19 | 0 | 0 | 1671(95.05%) |
+
+
+| BtAsiaPac | 1-failure | 2-failure | 3-failure | 4-failure | 5-failure | Total |
+| :----: | :----: | :----: | :----: | :----: | :----: | :----: |
+| Naive | 1368 | 54 | 39 | 0 | 0 | 1461 |
+| Naive-Recovered | 1368 | 13 | 4 | 0 | 0 | 1385(94.80%) |
+| P4Neighbor | 1398 | 39| 23 | 1 | 0 | 1461 |
+| P4Neighbor-Recovered | 1398 | 39 | 0 | 0 | 0 | 1437(98.36%) |
+
+
+| UUnet | 1-failure | 2-failure | 3-failure | 4-failure | 5-failure | Total |
+| :----: | :----: | :----: | :----: | :----: | :----: | :----: |
+| Naive | 1231 | 169 | 29 | 0 | 0 | 1429 |
+| Naive-Recovered | 1231 | 64 | 1 | 0 | 0 | 1296(90.69%) |
+| P4Neighbor | 1291 | 63| 75 | 0 | 0 | 1429 |
+| P4Neighbor-Recovered | 1291 | 63 | 1 | 0 | 0 | 1355(94.82%) |
+
+
+| Xspedius | 1-failure | 2-failure | 3-failure | 4-failure | 5-failure | Total |
+| :----: | :----: | :----: | :----: | :----: | :----: | :----: |
+| Naive | 1489 | 220 | 49 | 5 | 0 | 1763 |
+| Naive-Recovered | 1489 | 49 | 0 | 0 | 0 | 1538(87.24%) |
+| P4Neighbor | 1520 | 94| 145 | 4 | 0 | 1763 |
+| P4Neighbor-Recovered | 1520 | 94 | 0 | 0 | 0 | 1614(91.55%) |
+
+
 
 <!-- new eval result
 | Topo | Naive | P4Neigibor|
